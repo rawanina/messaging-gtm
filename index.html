@@ -517,6 +517,36 @@
   .dynamic-group:hover .group-delete-btn { opacity: 1; }
   .group-delete-btn:hover { color: var(--red); background: var(--red-light); }
 
+  /* ===== EDIT TASK ===== */
+  .task-edit-btn {
+    opacity: 0;
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 11px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .task:hover .task-edit-btn { opacity: 1; }
+  .task-edit-btn:hover { color: var(--blue); background: var(--blue-light); }
+  .task-edit-input {
+    flex: 1;
+    border: 1px solid var(--blue);
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 13px;
+    outline: none;
+    background: white;
+    font-family: inherit;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    min-width: 0;
+  }
+
   /* ===== ADD TASK ===== */
   .add-task-btn {
     display: inline-flex;
@@ -1302,6 +1332,92 @@
     });
   }
 
+  // ── Edit tasks ───────────────────────────────────────────────────────────
+  function addEditButton(taskEl, fbSavePath) {
+    const textSpan = taskEl.querySelector('.task-text');
+    if (!textSpan) return;
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'task-edit-btn';
+    editBtn.title = 'Edit task';
+    editBtn.textContent = '✏';
+
+    editBtn.onclick = () => {
+      // Hide text, show input
+      const currentText = textSpan.textContent.trim();
+      textSpan.style.display = 'none';
+      editBtn.style.display = 'none';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'task-edit-input';
+      input.value = currentText;
+      taskEl.insertBefore(input, textSpan);
+      input.focus();
+      input.select();
+
+      let saved = false;
+      const doSave = () => {
+        if (saved) return;
+        saved = true;
+        const newText = input.value.trim() || currentText;
+        textSpan.textContent = newText;
+        input.remove();
+        textSpan.style.display = '';
+        editBtn.style.display = '';
+        if (newText !== currentText) {
+          const updates = {};
+          updates[fbSavePath] = newText;
+          update(ref(db), updates);
+        }
+      };
+
+      const doCancel = () => {
+        if (saved) return;
+        saved = true;
+        input.remove();
+        textSpan.style.display = '';
+        editBtn.style.display = '';
+      };
+
+      input.addEventListener('blur', doSave);
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+        if (e.key === 'Escape') { saved = true; input.removeEventListener('blur', doSave); doCancel(); }
+      });
+    };
+
+    // Insert before delete button if present, otherwise append
+    const deleteBtn = taskEl.querySelector('.task-delete-btn');
+    if (deleteBtn) taskEl.insertBefore(editBtn, deleteBtn);
+    else taskEl.appendChild(editBtn);
+  }
+
+  // Wire edit buttons onto all static (hardcoded) tasks
+  // Run after checkboxes have their _fbKey assigned
+  document.querySelectorAll('.task').forEach(taskEl => {
+    const cb = taskEl.querySelector('input[type="checkbox"]');
+    if (!cb || !cb._fbKey) return;
+    addEditButton(taskEl, 'task_edits/' + cb._fbKey);
+  });
+
+  // Load saved edits from Firebase and apply to static tasks
+  onValue(ref(db, 'task_edits'), snap => {
+    const data = snap.val() || {};
+    document.querySelectorAll('.task').forEach(taskEl => {
+      const cb = taskEl.querySelector('input[type="checkbox"]');
+      if (!cb || !cb._fbKey) return;
+      const saved = data[cb._fbKey];
+      if (saved !== undefined) {
+        const textSpan = taskEl.querySelector('.task-text');
+        // Only update if not currently being edited
+        if (textSpan && textSpan.style.display !== 'none') {
+          textSpan.textContent = saved;
+        }
+      }
+    });
+  });
+
   // ── Dynamic Tasks + Groups ────────────────────────────────────────────────
   let _dynIdx = 0;
 
@@ -1438,6 +1554,9 @@
     if (metaParts.length) taskEl.appendChild(metaSpan);
     taskEl.appendChild(deleteBtn);
     section.insertBefore(taskEl, addBtn || null);
+
+    // Wire edit button — saves to the task's own text field in Firebase
+    addEditButton(taskEl, 'dynamic_tasks/' + section._sectionKey + '/' + taskKey + '/text');
   }
 
   // ── Add project (task-group) form + render ────────────────────────────────

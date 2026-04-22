@@ -429,6 +429,96 @@
   .sheet-table td[contenteditable]:focus{outline:2px solid var(--blue);outline-offset:-2px;background:#eff6ff;}
   .sheet-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);font-style:italic;}
 
+  /* ===== ADD TASK ===== */
+  .add-task-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    padding: 4px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .add-task-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--blue-light);
+  }
+  .add-task-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--blue-light);
+    border: 1px solid #bfdbfe;
+    flex-wrap: wrap;
+  }
+  .add-task-form input[type="text"] {
+    border: 1px solid #bfdbfe;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 13px;
+    outline: none;
+    background: white;
+    font-family: inherit;
+  }
+  .add-task-form input[type="text"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+  }
+  .add-task-form .task-input { flex: 1; min-width: 160px; }
+  .add-task-form .owner-input { width: 110px; }
+  .add-task-form .due-input { width: 90px; }
+  .add-task-form-btns { display: flex; gap: 4px; }
+  .add-task-save-btn {
+    padding: 5px 12px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-task-save-btn:hover { background: #1d4ed8; }
+  .add-task-cancel-btn {
+    padding: 5px 8px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-task-cancel-btn:hover { background: white; }
+  .task-delete-btn {
+    opacity: 0;
+    margin-left: auto;
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .task:hover .task-delete-btn { opacity: 1; }
+  .task-delete-btn:hover { color: var(--red); background: var(--red-light); }
+
   @media (max-width: 600px) {
     .header { padding: 20px; }
     .container { padding: 16px; }
@@ -1123,6 +1213,154 @@
       ind.textContent = snap.val() ? '🟢 Live' : '🔴 Offline';
     });
   }
+
+  // ── Dynamic Tasks ─────────────────────────────────────────────────────────
+  // Assign stable keys to each section and inject "+ Add task" buttons
+  document.querySelectorAll('.section').forEach((section, i) => {
+    section._sectionKey = 'section_' + i;
+
+    const btn = document.createElement('button');
+    btn.className = 'add-task-btn';
+    btn.textContent = '+ Add task';
+    btn.onclick = () => showAddTaskForm(section, btn);
+    section.appendChild(btn);
+  });
+
+  function showAddTaskForm(section, addBtn) {
+    addBtn.style.display = 'none';
+
+    const form = document.createElement('div');
+    form.className = 'add-task-form';
+    form.innerHTML = `
+      <input type="checkbox" disabled style="margin-top:0;width:15px;height:15px;flex-shrink:0;">
+      <input type="text" class="task-input" placeholder="Task name…" />
+      <input type="text" class="owner-input" placeholder="Owner" />
+      <input type="text" class="due-input" placeholder="Due date" />
+      <div class="add-task-form-btns">
+        <button class="add-task-save-btn">Save</button>
+        <button class="add-task-cancel-btn">Cancel</button>
+      </div>
+    `;
+
+    const taskInput = form.querySelector('.task-input');
+    const ownerInput = form.querySelector('.owner-input');
+    const dueInput = form.querySelector('.due-input');
+
+    form.querySelector('.add-task-cancel-btn').onclick = () => {
+      form.remove();
+      addBtn.style.display = '';
+    };
+
+    const doSave = () => {
+      const text = taskInput.value.trim();
+      if (!text) { taskInput.focus(); taskInput.style.borderColor = 'var(--red)'; return; }
+      const taskKey = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+      const taskData = {
+        text,
+        owner: ownerInput.value.trim(),
+        due: dueInput.value.trim(),
+        checked: false,
+        createdAt: Date.now()
+      };
+      const updates = {};
+      updates['dynamic_tasks/' + section._sectionKey + '/' + taskKey] = taskData;
+      update(ref(db), updates).then(() => {
+        form.remove();
+        addBtn.style.display = '';
+      });
+    };
+
+    form.querySelector('.add-task-save-btn').onclick = doSave;
+    taskInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSave();
+      if (e.key === 'Escape') form.querySelector('.add-task-cancel-btn').click();
+    });
+
+    section.insertBefore(form, addBtn);
+    taskInput.focus();
+  }
+
+  function renderDynamicTask(section, taskKey, taskData) {
+    const addBtn = section.querySelector('.add-task-btn');
+    const taskEl = document.createElement('div');
+    taskEl.className = 'task';
+    taskEl.dataset.taskKey = taskKey;
+    taskEl.dataset.sectionKey = section._sectionKey;
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = taskData.checked || false;
+    cb.style.cssText = 'margin-top:2px;width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:var(--blue);';
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'task-text' + (taskData.checked ? ' checked' : '');
+    textSpan.textContent = taskData.text;
+
+    const metaParts = [];
+    if (taskData.owner) metaParts.push(taskData.owner);
+    if (taskData.due) metaParts.push(taskData.due);
+    const metaSpan = document.createElement('span');
+    metaSpan.className = 'task-owner';
+    metaSpan.textContent = metaParts.join(' · ');
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'task-delete-btn';
+    deleteBtn.title = 'Delete task';
+    deleteBtn.textContent = '✕';
+
+    cb._fbKey = 'dynamic_' + section._sectionKey + '_' + taskKey;
+    cb.onchange = function() {
+      textSpan.classList.toggle('checked', this.checked);
+      const updates = {};
+      updates['dynamic_tasks/' + section._sectionKey + '/' + taskKey + '/checked'] = this.checked;
+      updates['checkboxes/' + cb._fbKey] = this.checked;
+      update(ref(db), updates);
+    };
+
+    deleteBtn.onclick = () => {
+      taskEl.style.opacity = '0.4';
+      const updates = {};
+      updates['dynamic_tasks/' + section._sectionKey + '/' + taskKey] = null;
+      update(ref(db), updates);
+    };
+
+    taskEl.appendChild(cb);
+    taskEl.appendChild(textSpan);
+    if (metaParts.length) taskEl.appendChild(metaSpan);
+    taskEl.appendChild(deleteBtn);
+    section.insertBefore(taskEl, addBtn || null);
+  }
+
+  // Listen for dynamic tasks from Firebase — handles initial load + remote changes
+  onValue(ref(db, 'dynamic_tasks'), snap => {
+    const data = snap.val() || {};
+
+    document.querySelectorAll('.section').forEach(section => {
+      const sectionData = data[section._sectionKey] || {};
+
+      // Remove tasks deleted remotely
+      section.querySelectorAll('.task[data-task-key]').forEach(el => {
+        if (!sectionData[el.dataset.taskKey]) el.remove();
+      });
+
+      // Add or update tasks
+      const sorted = Object.entries(sectionData).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+      sorted.forEach(([taskKey, taskData]) => {
+        const existing = section.querySelector(`.task[data-task-key="${taskKey}"]`);
+        if (!existing) {
+          renderDynamicTask(section, taskKey, taskData);
+        } else {
+          // Sync checkbox state from remote
+          const cb = existing.querySelector('input[type="checkbox"]');
+          if (cb && cb.checked !== (taskData.checked || false)) {
+            cb.checked = taskData.checked || false;
+            const ts = existing.querySelector('.task-text');
+            if (ts) ts.classList.toggle('checked', cb.checked);
+          }
+        }
+      });
+    });
+  });
 
   // ── Legacy functions (kept for onclick handlers) ──────────────────────────
   function togglePhase(header) {

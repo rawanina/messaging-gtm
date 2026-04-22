@@ -429,6 +429,94 @@
   .sheet-table td[contenteditable]:focus{outline:2px solid var(--blue);outline-offset:-2px;background:#eff6ff;}
   .sheet-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);font-style:italic;}
 
+  /* ===== ADD PROJECT (task-group) ===== */
+  .add-project-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    margin-left: 6px;
+    padding: 4px 10px;
+    border: 1px dashed #c4b5fd;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--purple);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .add-project-btn:hover {
+    border-color: var(--purple);
+    background: var(--purple-light);
+  }
+  .add-group-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--purple-light);
+    border: 1px solid #c4b5fd;
+  }
+  .add-group-form input[type="text"] {
+    flex: 1;
+    border: 1px solid #c4b5fd;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+    background: white;
+    font-family: inherit;
+  }
+  .add-group-form input[type="text"]:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
+  }
+  .add-group-save-btn {
+    padding: 5px 12px;
+    background: var(--purple);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-group-save-btn:hover { background: #6d28d9; }
+  .dynamic-group {
+    margin-bottom: 14px;
+    border: 1px solid #e9d5ff;
+    border-radius: 8px;
+    padding: 10px 14px 8px;
+    background: #faf5ff;
+  }
+  .dynamic-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .group-delete-btn {
+    opacity: 0;
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .dynamic-group:hover .group-delete-btn { opacity: 1; }
+  .group-delete-btn:hover { color: var(--red); background: var(--red-light); }
+
   /* ===== ADD TASK ===== */
   .add-task-btn {
     display: inline-flex;
@@ -1214,11 +1302,10 @@
     });
   }
 
-  // ── Dynamic Tasks ─────────────────────────────────────────────────────────
-  // Add buttons to task-groups (e.g. DM Agent, Forms, Stacks).
-  // For sections with no task-groups (Beta, Post-Thailand, etc.) add at section level.
+  // ── Dynamic Tasks + Groups ────────────────────────────────────────────────
   let _dynIdx = 0;
 
+  // Add "+ Add task" to static task-groups
   document.querySelectorAll('.task-group').forEach(group => {
     group._sectionKey = 'dyngrp_' + _dynIdx++;
     const btn = document.createElement('button');
@@ -1228,15 +1315,24 @@
     group.appendChild(btn);
   });
 
-  document.querySelectorAll('.section').forEach(section => {
+  // For each section: if no task-groups → add task button; always add project button
+  document.querySelectorAll('.section').forEach((section, i) => {
+    section._secKey = 'sec_' + i;
+
     if (!section.querySelector('.task-group')) {
       section._sectionKey = 'dynsec_' + _dynIdx++;
-      const btn = document.createElement('button');
-      btn.className = 'add-task-btn';
-      btn.textContent = '+ Add task';
-      btn.onclick = () => showAddTaskForm(section, btn);
-      section.appendChild(btn);
+      const taskBtn = document.createElement('button');
+      taskBtn.className = 'add-task-btn';
+      taskBtn.textContent = '+ Add task';
+      taskBtn.onclick = () => showAddTaskForm(section, taskBtn);
+      section.appendChild(taskBtn);
     }
+
+    const projBtn = document.createElement('button');
+    projBtn.className = 'add-project-btn';
+    projBtn.textContent = '+ Add project';
+    projBtn.onclick = () => showAddGroupForm(section, projBtn);
+    section.appendChild(projBtn);
   });
 
   function showAddTaskForm(section, addBtn) {
@@ -1344,13 +1440,132 @@
     section.insertBefore(taskEl, addBtn || null);
   }
 
+  // ── Add project (task-group) form + render ────────────────────────────────
+  function showAddGroupForm(section, addBtn) {
+    addBtn.style.display = 'none';
+
+    const form = document.createElement('div');
+    form.className = 'add-group-form';
+    form.innerHTML = `
+      <input type="text" placeholder="Project name (e.g. Launch Creative Assets)…" />
+      <div class="add-task-form-btns">
+        <button class="add-group-save-btn">Save</button>
+        <button class="add-task-cancel-btn">Cancel</button>
+      </div>
+    `;
+
+    const titleInput = form.querySelector('input');
+
+    form.querySelector('.add-task-cancel-btn').onclick = () => {
+      form.remove();
+      addBtn.style.display = '';
+    };
+
+    const doSave = () => {
+      const title = titleInput.value.trim();
+      if (!title) { titleInput.focus(); titleInput.style.borderColor = 'var(--red)'; return; }
+      const groupKey = 'group_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+      const updates = {};
+      updates['dynamic_groups/' + section._secKey + '/' + groupKey] = { title, createdAt: Date.now() };
+      update(ref(db), updates).then(() => {
+        form.remove();
+        addBtn.style.display = '';
+      });
+    };
+
+    form.querySelector('.add-group-save-btn').onclick = doSave;
+    titleInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSave();
+      if (e.key === 'Escape') form.querySelector('.add-task-cancel-btn').click();
+    });
+
+    section.insertBefore(form, addBtn);
+    titleInput.focus();
+  }
+
+  function renderDynamicGroup(section, groupKey, groupData) {
+    const addProjBtn = section.querySelector('.add-project-btn');
+    const dynKey = 'dyndyngrp_' + groupKey;
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'dynamic-group';
+    groupEl.dataset.groupKey = groupKey;
+    groupEl.dataset.secKey = section._secKey;
+    groupEl._sectionKey = dynKey;
+
+    // Header: title + delete button
+    const header = document.createElement('div');
+    header.className = 'dynamic-group-header';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'task-group-title';
+    titleEl.textContent = groupData.title;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'group-delete-btn';
+    deleteBtn.title = 'Delete group + all its tasks';
+    deleteBtn.textContent = '✕';
+    deleteBtn.onclick = () => {
+      groupEl.style.opacity = '0.4';
+      const updates = {};
+      updates['dynamic_groups/' + section._secKey + '/' + groupKey] = null;
+      updates['dynamic_tasks/' + dynKey] = null;
+      update(ref(db), updates);
+    };
+
+    header.appendChild(titleEl);
+    header.appendChild(deleteBtn);
+    groupEl.appendChild(header);
+
+    // Add task button for this group
+    const addTaskBtn = document.createElement('button');
+    addTaskBtn.className = 'add-task-btn';
+    addTaskBtn.textContent = '+ Add task';
+    addTaskBtn.onclick = () => showAddTaskForm(groupEl, addTaskBtn);
+    groupEl.appendChild(addTaskBtn);
+
+    section.insertBefore(groupEl, addProjBtn || null);
+
+    // Load any existing tasks for this group
+    get(ref(db, 'dynamic_tasks/' + dynKey)).then(snap => {
+      const tasks = snap.val() || {};
+      Object.entries(tasks)
+        .sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0))
+        .forEach(([taskKey, taskData]) => renderDynamicTask(groupEl, taskKey, taskData));
+    });
+  }
+
+  // Listen for dynamic groups
+  onValue(ref(db, 'dynamic_groups'), snap => {
+    const data = snap.val() || {};
+    document.querySelectorAll('.section').forEach(section => {
+      if (!section._secKey) return;
+      const secData = data[section._secKey] || {};
+
+      // Remove groups deleted remotely
+      section.querySelectorAll('.dynamic-group[data-group-key]').forEach(el => {
+        if (!secData[el.dataset.groupKey]) el.remove();
+      });
+
+      // Add new groups
+      Object.entries(secData)
+        .sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0))
+        .forEach(([groupKey, groupData]) => {
+          if (!section.querySelector(`.dynamic-group[data-group-key="${groupKey}"]`)) {
+            renderDynamicGroup(section, groupKey, groupData);
+          }
+        });
+    });
+  });
+
   // Listen for dynamic tasks from Firebase — handles initial load + remote changes
   onValue(ref(db, 'dynamic_tasks'), snap => {
     const data = snap.val() || {};
 
-    // All containers that can hold dynamic tasks
+    // All containers that can hold dynamic tasks (static groups, bare sections, dynamic groups)
     const containers = [
-      ...document.querySelectorAll('.task-group[class]'),
+      ...document.querySelectorAll('.task-group'),
+      ...document.querySelectorAll('.dynamic-group'),
       ...document.querySelectorAll('.section')
     ].filter(el => el._sectionKey);
 

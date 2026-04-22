@@ -1215,15 +1215,28 @@
   }
 
   // ── Dynamic Tasks ─────────────────────────────────────────────────────────
-  // Assign stable keys to each section and inject "+ Add task" buttons
-  document.querySelectorAll('.section').forEach((section, i) => {
-    section._sectionKey = 'section_' + i;
+  // Add buttons to task-groups (e.g. DM Agent, Forms, Stacks).
+  // For sections with no task-groups (Beta, Post-Thailand, etc.) add at section level.
+  let _dynIdx = 0;
 
+  document.querySelectorAll('.task-group').forEach(group => {
+    group._sectionKey = 'dyngrp_' + _dynIdx++;
     const btn = document.createElement('button');
     btn.className = 'add-task-btn';
     btn.textContent = '+ Add task';
-    btn.onclick = () => showAddTaskForm(section, btn);
-    section.appendChild(btn);
+    btn.onclick = () => showAddTaskForm(group, btn);
+    group.appendChild(btn);
+  });
+
+  document.querySelectorAll('.section').forEach(section => {
+    if (!section.querySelector('.task-group')) {
+      section._sectionKey = 'dynsec_' + _dynIdx++;
+      const btn = document.createElement('button');
+      btn.className = 'add-task-btn';
+      btn.textContent = '+ Add task';
+      btn.onclick = () => showAddTaskForm(section, btn);
+      section.appendChild(btn);
+    }
   });
 
   function showAddTaskForm(section, addBtn) {
@@ -1335,22 +1348,27 @@
   onValue(ref(db, 'dynamic_tasks'), snap => {
     const data = snap.val() || {};
 
-    document.querySelectorAll('.section').forEach(section => {
-      const sectionData = data[section._sectionKey] || {};
+    // All containers that can hold dynamic tasks
+    const containers = [
+      ...document.querySelectorAll('.task-group[class]'),
+      ...document.querySelectorAll('.section')
+    ].filter(el => el._sectionKey);
+
+    containers.forEach(container => {
+      const sectionData = data[container._sectionKey] || {};
 
       // Remove tasks deleted remotely
-      section.querySelectorAll('.task[data-task-key]').forEach(el => {
+      container.querySelectorAll('.task[data-task-key]').forEach(el => {
         if (!sectionData[el.dataset.taskKey]) el.remove();
       });
 
       // Add or update tasks
       const sorted = Object.entries(sectionData).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
       sorted.forEach(([taskKey, taskData]) => {
-        const existing = section.querySelector(`.task[data-task-key="${taskKey}"]`);
+        const existing = container.querySelector(`.task[data-task-key="${taskKey}"]`);
         if (!existing) {
-          renderDynamicTask(section, taskKey, taskData);
+          renderDynamicTask(container, taskKey, taskData);
         } else {
-          // Sync checkbox state from remote
           const cb = existing.querySelector('input[type="checkbox"]');
           if (cb && cb.checked !== (taskData.checked || false)) {
             cb.checked = taskData.checked || false;

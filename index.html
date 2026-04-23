@@ -415,17 +415,17 @@
   .sheet-section{background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
   .sheet-title{padding:14px 20px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);border-bottom:1px solid var(--border);}
   .sheet-wrap{overflow-x:auto;}
-  .sheet-table{width:100%;border-collapse:collapse;font-size:13px;}
-  .sheet-table td:nth-child(1){white-space:nowrap;}
-  .sheet-table td:nth-child(5){min-width:130px;}
-  .sheet-table td:nth-child(6),.sheet-table td:nth-child(7){min-width:115px;}
-  .sheet-table td:nth-child(8){min-width:120px;}
-  .sheet-table th{background:#f8fafc;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:2px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;}
+  .sheet-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+  .sheet-table th{background:#f8fafc;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:2px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;position:relative;overflow:hidden;}
   .sheet-table th:last-child{border-right:none;}
-  .sheet-table td{padding:8px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;line-height:1.5;}
+  .sheet-table td{padding:8px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;line-height:1.5;overflow:hidden;word-break:break-word;}
   .sheet-table td:last-child{border-right:none;}
   .sheet-table tr:last-child td{border-bottom:none;}
   .sheet-table .wk{font-weight:700;white-space:nowrap;background:#f8fafc;font-size:12px;}
+  /* Column resize handle */
+  .col-resize-handle{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;z-index:2;}
+  .col-resize-handle:hover{background:var(--blue);opacity:0.35;}
+  .col-resize-handle.col-resizing{background:var(--blue);opacity:0.5;}
   .sheet-table .freeze-row td{background:#f3f4f6;color:var(--text-muted);}
   .sheet-table .thai-row td{background:#fffbeb;}
   .sheet-table .gtm-row td{background:#ecfdf5;font-weight:700;color:var(--green);font-size:14px;}
@@ -434,8 +434,9 @@
   .sheet-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);font-style:italic;}
 
   /* Status badges */
-  .st-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;cursor:pointer;user-select:none;white-space:nowrap;transition:filter 0.1s;}
-  .st-badge:hover{filter:brightness(0.92);}
+  .st-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;cursor:pointer;user-select:none;white-space:nowrap;}
+  .st-badge:hover{filter:brightness(0.93);}
+  .st-badge::after{content:'▾';font-size:9px;opacity:0.6;}
   .st-gray{background:#f3f4f6;color:#6b7280;}
   .st-blue{background:#dbeafe;color:#1d4ed8;}
   .st-lblue{background:#e0f2fe;color:#0369a1;}
@@ -443,7 +444,14 @@
   .st-purple{background:#f5f3ff;color:#6d28d9;}
   .st-green{background:#dcfce7;color:#15803d;}
   .st-teal{background:#ccfbf1;color:#0f766e;}
-  .sheet-table td.st-cell{min-width:120px;vertical-align:middle;}
+  .sheet-table td.st-cell{vertical-align:middle;}
+  /* Status dropdown */
+  .st-dropdown{position:fixed;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:9999;min-width:170px;padding:4px;display:none;}
+  .st-dropdown.open{display:block;}
+  .st-dropdown-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text);}
+  .st-dropdown-item:hover{background:var(--gray-light);}
+  .st-dropdown-item.active{background:var(--gray-light);}
+  .st-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 
   /* Link chips */
   .link-cell{min-width:130px;vertical-align:top;}
@@ -1173,17 +1181,27 @@
   <div class="sheet-section">
     <div class="sheet-title">📋 Weekly Deliverables Tracker</div>
     <div class="sheet-wrap">
-      <table class="sheet-table">
+      <table class="sheet-table" id="deliverables-table">
+        <colgroup>
+          <col style="width:118px">
+          <col style="width:238px">
+          <col style="width:210px">
+          <col style="width:158px">
+          <col style="width:138px">
+          <col style="width:118px">
+          <col style="width:128px">
+          <col style="width:178px">
+        </colgroup>
         <thead>
           <tr>
-            <th>Week</th>
-            <th>Design Deliverable</th>
-            <th>Eng Deliverable</th>
-            <th>Marketing Deliverables</th>
-            <th>Links</th>
-            <th>Design Status</th>
-            <th>Eng Status</th>
-            <th>Notes</th>
+            <th>Week<div class="col-resize-handle"></div></th>
+            <th>Design Deliverable<div class="col-resize-handle"></div></th>
+            <th>Eng Deliverable<div class="col-resize-handle"></div></th>
+            <th>Marketing Deliverables<div class="col-resize-handle"></div></th>
+            <th>Links<div class="col-resize-handle"></div></th>
+            <th>Design Status<div class="col-resize-handle"></div></th>
+            <th>Eng Status<div class="col-resize-handle"></div></th>
+            <th>Notes<div class="col-resize-handle"></div></th>
           </tr>
         </thead>
         <tbody>
@@ -1791,29 +1809,82 @@
     });
   });
 
-  // ── Status badges (click-to-cycle) ───────────────────────────────────────
+  // ── Column resize ─────────────────────────────────────────────────────────
+  const DEFAULT_COL_WIDTHS = [118, 238, 210, 158, 138, 118, 128, 178];
+  const tableCols = document.querySelectorAll('#deliverables-table col');
+  const tableHeaders = document.querySelectorAll('#deliverables-table th');
+
+  function applyColWidths(widths) {
+    tableCols.forEach((col, i) => { if (widths[i]) col.style.width = widths[i] + 'px'; });
+  }
+
+  get(ref(db, 'table_col_widths')).then(snap => {
+    applyColWidths(snap.val() || DEFAULT_COL_WIDTHS);
+  });
+
+  let colDrag = null;
+  tableHeaders.forEach((th, i) => {
+    const handle = th.querySelector('.col-resize-handle');
+    if (!handle) return;
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault();
+      colDrag = { i, startX: e.clientX, startW: tableCols[i].offsetWidth };
+      handle.classList.add('col-resizing');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!colDrag) return;
+    const newW = Math.max(60, colDrag.startW + (e.clientX - colDrag.startX));
+    tableCols[colDrag.i].style.width = newW + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!colDrag) return;
+    document.querySelectorAll('.col-resize-handle').forEach(h => h.classList.remove('col-resizing'));
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    const widths = Array.from(tableCols).map(c => parseInt(c.style.width) || 120);
+    const updates = {}; updates['table_col_widths'] = widths;
+    update(ref(db), updates);
+    colDrag = null;
+  });
+
+  // ── Status dropdowns ──────────────────────────────────────────────────────
   const DESIGN_ST = [
-    { label: 'Not started',  cls: 'st-gray'   },
-    { label: 'In progress',  cls: 'st-blue'   },
-    { label: 'Review',       cls: 'st-yellow' },
-    { label: 'Completed',    cls: 'st-green'  },
+    { label: 'Not started',  cls: 'st-gray',   dot: '#9ca3af' },
+    { label: 'In progress',  cls: 'st-blue',   dot: '#3b82f6' },
+    { label: 'Review',       cls: 'st-yellow', dot: '#f59e0b' },
+    { label: 'Completed',    cls: 'st-green',  dot: '#22c55e' },
   ];
   const ENG_ST = [
-    { label: 'Not started',         cls: 'st-gray'   },
-    { label: 'Partially developed', cls: 'st-lblue'  },
-    { label: 'In Progress',         cls: 'st-blue'   },
-    { label: 'QA',                  cls: 'st-purple' },
-    { label: 'Completed',           cls: 'st-green'  },
-    { label: 'Shipped',             cls: 'st-teal'   },
+    { label: 'Not started',         cls: 'st-gray',   dot: '#9ca3af' },
+    { label: 'Partially developed', cls: 'st-lblue',  dot: '#38bdf8' },
+    { label: 'In Progress',         cls: 'st-blue',   dot: '#3b82f6' },
+    { label: 'QA',                  cls: 'st-purple', dot: '#a855f7' },
+    { label: 'Completed',           cls: 'st-green',  dot: '#22c55e' },
+    { label: 'Shipped',             cls: 'st-teal',   dot: '#14b8a6' },
   ];
 
-  function initStatusCell(cell) {
-    const type = cell.dataset.type;
-    const row  = cell.dataset.row;
-    const states = type === 'design' ? DESIGN_ST : ENG_ST;
-    const fbKey = 'table_status/' + type + '_' + row;
+  // Single shared dropdown panel
+  const stDropdown = document.createElement('div');
+  stDropdown.className = 'st-dropdown';
+  document.body.appendChild(stDropdown);
+  let stActiveCell = null;
 
-    let current = 0;
+  function closeStDropdown() { stDropdown.classList.remove('open'); stActiveCell = null; }
+  document.addEventListener('click', e => {
+    if (!stDropdown.contains(e.target) && !e.target.closest('.st-badge')) closeStDropdown();
+  });
+
+  function initStatusCell(cell) {
+    const type   = cell.dataset.type;
+    const row    = cell.dataset.row;
+    const states = type === 'design' ? DESIGN_ST : ENG_ST;
+    const fbKey  = 'table_status/' + type + '_' + row;
+    let current  = 0;
 
     const badge = document.createElement('span');
     badge.className = 'st-badge ' + states[0].cls;
@@ -1821,16 +1892,32 @@
     cell.appendChild(badge);
 
     const applyState = (idx) => {
-      current = idx;
-      badge.textContent = states[idx].label;
-      badge.className = 'st-badge ' + states[idx].cls;
+      current = (idx >= 0 && idx < states.length) ? idx : 0;
+      badge.textContent = states[current].label;
+      badge.className = 'st-badge ' + states[current].cls;
     };
 
-    badge.addEventListener('click', () => {
-      const next = (current + 1) % states.length;
-      applyState(next);
-      const updates = {}; updates[fbKey] = next;
-      update(ref(db), updates);
+    badge.addEventListener('click', e => {
+      e.stopPropagation();
+      if (stActiveCell === cell) { closeStDropdown(); return; }
+      stActiveCell = cell;
+      stDropdown.innerHTML = '';
+      states.forEach((st, idx) => {
+        const item = document.createElement('div');
+        item.className = 'st-dropdown-item' + (idx === current ? ' active' : '');
+        item.innerHTML = `<span class="st-dot" style="background:${st.dot}"></span>${st.label}`;
+        item.addEventListener('click', () => {
+          applyState(idx);
+          const updates = {}; updates[fbKey] = idx;
+          update(ref(db), updates);
+          closeStDropdown();
+        });
+        stDropdown.appendChild(item);
+      });
+      const rect = badge.getBoundingClientRect();
+      stDropdown.style.top  = (rect.bottom + 4) + 'px';
+      stDropdown.style.left = rect.left + 'px';
+      stDropdown.classList.add('open');
     });
 
     cell._applyState = applyState;

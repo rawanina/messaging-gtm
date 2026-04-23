@@ -4,32 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Messaging GTM Workback Plan — June 15, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #1a9e6b;
-    --green-light: #e6f7f1;
-    --blue: #2563eb;
-    --blue-light: #eff6ff;
-    --orange: #ea580c;
-    --orange-light: #fff7ed;
-    --red: #dc2626;
-    --red-light: #fef2f2;
-    --yellow: #d97706;
-    --yellow-light: #fffbeb;
-    --gray: #6b7280;
-    --gray-light: #f9fafb;
-    --border: #e5e7eb;
-    --text: #111827;
-    --text-muted: #6b7280;
-    --purple: #7c3aed;
-    --purple-light: #f5f3ff;
+    /* ── Linktree brand palette ── */
+    --lt-shade:      #1E2330;
+    --lt-canopy:     #43E660;
+    --lt-lavender:   #E9C0E9;
+    --lt-felt:       #B69FAF;
+    --lt-dahlia:     #502274;
+    --lt-orchid:     #D717E7;
+    --lt-hydrangea:  #2665D6;
+    --lt-chartreuse: #D2E823;
+
+    /* ── Semantic tokens ── */
+    --green:         #2DBD52;
+    --green-light:   #E6F9EC;
+    --blue:          #2665D6;   /* Hydrangea */
+    --blue-light:    #EAF1FC;
+    --orange:        #ea580c;
+    --orange-light:  #fff7ed;
+    --red:           #dc2626;
+    --red-light:     #fef2f2;
+    --yellow:        #d97706;
+    --yellow-light:  #fffbeb;
+    --gray:          #7B7490;
+    --gray-light:    #F5F1FA;   /* faint lavender wash */
+    --border:        #E6DFF0;   /* lavender-tinted border */
+    --text:          #1E2330;   /* Shade */
+    --text-muted:    #7B7490;
+    --purple:        #502274;   /* Dahlia */
+    --purple-light:  #F6ECF9;   /* light lavender */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f3f4f6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #F0EBF7;
     color: var(--text);
     font-size: 14px;
     line-height: 1.6;
@@ -40,47 +54,75 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: #1f2937;
-    border-bottom: 1px solid #374151;
-    padding: 0 40px;
+    background: var(--lt-shade);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0 32px;
     display: flex;
     align-items: center;
     gap: 2px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.28);
+  }
+  .sticky-nav .nav-logo {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+    padding-right: 16px;
+    border-right: 1px solid rgba(255,255,255,0.12);
+    flex-shrink: 0;
+    height: 44px;
+  }
+  .sticky-nav .nav-logo svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--lt-canopy);
   }
   .sticky-nav a {
-    color: #9ca3af;
+    color: rgba(255,255,255,0.55);
     text-decoration: none;
     font-size: 12px;
     font-weight: 600;
-    padding: 12px 14px;
+    padding: 13px 13px;
     border-bottom: 2px solid transparent;
     transition: color 0.15s, border-color 0.15s;
     white-space: nowrap;
     letter-spacing: 0.02em;
   }
   .sticky-nav a:hover { color: white; }
-  .sticky-nav a.nav-active { color: white; border-bottom-color: #60a5fa; }
+  .sticky-nav a.nav-active { color: white; border-bottom-color: var(--lt-canopy); }
   .sticky-nav .nav-launch {
     margin-left: auto;
-    color: #34d399;
+    color: var(--lt-canopy);
     font-size: 12px;
     font-weight: 700;
-    padding: 12px 0 12px 14px;
+    padding: 13px 0 13px 14px;
     white-space: nowrap;
   }
 
   .header {
-    background: #111827;
+    background: linear-gradient(135deg, #1E2330 0%, #2D1E40 100%);
     color: white;
-    padding: 32px 40px;
+    padding: 28px 40px 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
-  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-  .header .meta { color: #9ca3af; font-size: 13px; }
+  .header-logo {
+    flex-shrink: 0;
+    opacity: 0.92;
+  }
+  .header-logo svg {
+    width: 36px;
+    height: 36px;
+    fill: var(--lt-canopy);
+    display: block;
+  }
+  .header-text {}
+  .header h1 { font-size: 22px; font-weight: 800; margin-bottom: 3px; letter-spacing: -0.02em; }
+  .header .meta { color: rgba(255,255,255,0.5); font-size: 13px; }
 
   .timeline-bar {
     background: white;
-    padding: 24px 40px;
+    padding: 24px 32px;
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
   }
@@ -138,7 +180,7 @@
   .key-dates {
     background: white;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 20px 24px;
     margin-bottom: 20px;
   }
@@ -172,7 +214,7 @@
   .phase {
     background: white;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 16px;
     overflow: hidden;
   }
@@ -194,9 +236,9 @@
     white-space: nowrap;
   }
   .phase-1 .phase-badge { background: var(--blue-light); color: var(--blue); }
-  .phase-2 .phase-badge { background: var(--purple-light); color: var(--purple); }
+  .phase-2 .phase-badge { background: var(--purple-light); color: var(--lt-dahlia); }
   .phase-3 .phase-badge { background: var(--orange-light); color: var(--orange); }
-  .phase-4 .phase-badge { background: var(--green-light); color: var(--green); }
+  .phase-4 .phase-badge { background: #E5FAE9; color: #1A7C34; }
   .phase-title { font-size: 15px; font-weight: 700; flex: 1; }
   .phase-dates { font-size: 12px; color: var(--text-muted); }
   .phase-toggle { color: var(--text-muted); font-size: 12px; transition: transform 0.2s; }
@@ -283,7 +325,7 @@
     height: 15px;
     flex-shrink: 0;
     cursor: pointer;
-    accent-color: var(--blue);
+    accent-color: var(--lt-dahlia);
   }
   .task-text {
     font-size: 13px;
@@ -343,13 +385,13 @@
   .risk-register {
     background: white;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 16px;
     overflow: hidden;
   }
   .risk-header {
     padding: 16px 24px;
-    background: #111827;
+    background: var(--lt-shade);
     color: white;
     font-size: 15px;
     font-weight: 700;
@@ -389,37 +431,37 @@
   .progress-fill {
     height: 100%;
     border-radius: 10px;
-    background: var(--blue);
+    background: var(--lt-canopy);
     transition: width 0.3s;
   }
   .progress-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
   .beta-tracker {
-    background: var(--blue-light);
-    border: 1px solid #bfdbfe;
+    background: var(--purple-light);
+    border: 1px solid #DDD0F0;
     border-radius: 8px;
     padding: 14px 18px;
     margin-bottom: 10px;
   }
-  .beta-tracker h4 { font-size: 12px; font-weight: 700; color: var(--blue); margin-bottom: 8px; }
+  .beta-tracker h4 { font-size: 12px; font-weight: 700; color: var(--lt-dahlia); margin-bottom: 8px; }
   .beta-milestones { display: flex; gap: 12px; }
   .beta-m {
     flex: 1;
     background: white;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 8px 12px;
     text-align: center;
-    border: 1px solid #bfdbfe;
+    border: 1px solid #DDD0F0;
   }
-  .beta-m .num { font-size: 18px; font-weight: 800; color: var(--blue); }
+  .beta-m .num { font-size: 18px; font-weight: 800; color: var(--lt-dahlia); }
   .beta-m .label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 
   /* ===== GANTT ===== */
-  .gantt-section{background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
+  .gantt-section{background:white;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
   .gantt-title{padding:14px 20px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
   .gantt-inner{overflow-x:auto;}
   .gantt-chart{min-width:720px;}
-  .gantt-head,.gantt-row{display:flex;border-bottom:1px solid #f3f4f6;}
+  .gantt-head,.gantt-row{display:flex;border-bottom:1px solid #EDE7F5;}
   .gantt-head{background:var(--gray-light);border-bottom:2px solid var(--border);}
   .gantt-row:hover{background:#fafafa;}
   .gantt-flabel{width:160px;flex-shrink:0;padding:6px 14px;font-size:12px;color:var(--text);border-right:1px solid var(--border);display:flex;align-items:center;line-height:1.3;}
@@ -434,9 +476,9 @@
   .gantt-shade.gfreeze{background:#6b7280;opacity:0.12;}
   .gantt-shade.gthailand{background:#f59e0b;opacity:0.18;}
   .gantt-bar{position:absolute;top:50%;transform:translateY(-50%);height:20px;border-radius:4px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:6px;z-index:2;}
-  .gantt-group-row{display:flex;background:#f8fafc;border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
+  .gantt-group-row{display:flex;background:#F5F1FA;border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
   .gantt-gname{width:160px;flex-shrink:0;padding:5px 14px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;border-right:1px solid var(--border);display:flex;align-items:center;gap:4px;}
-  .gantt-gtrack{flex:1;position:relative;height:24px;background:#f8fafc;}
+  .gantt-gtrack{flex:1;position:relative;height:24px;background:#F5F1FA;}
   .gantt-legend{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
   .gantt-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);}
   .gantt-legend-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
@@ -444,41 +486,41 @@
   .gantt-bar:hover{filter:brightness(1.08);}
   .gantt-resize-handle{position:absolute;right:0;top:0;bottom:0;width:8px;cursor:ew-resize;border-radius:0 4px 4px 0;background:rgba(255,255,255,0.25);}
   .gantt-resize-handle:hover{background:rgba(255,255,255,0.5);}
-  .gantt-date-tooltip{position:fixed;background:#111827;color:white;font-size:11px;font-weight:600;padding:5px 10px;border-radius:5px;pointer-events:none;z-index:9999;display:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+  .gantt-date-tooltip{position:fixed;background:var(--lt-shade);color:white;font-size:11px;font-weight:600;padding:5px 10px;border-radius:5px;pointer-events:none;z-index:9999;display:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3);}
 
   /* ===== SHEET TABLE ===== */
-  .sheet-section{background:white;border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
+  .sheet-section{background:white;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
   .sheet-title{padding:14px 20px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);border-bottom:1px solid var(--border);}
   .sheet-wrap{overflow-x:auto;}
   .sheet-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
-  .sheet-table th{background:#f8fafc;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:2px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;position:relative;overflow:hidden;}
+  .sheet-table th{background:#F5F1FA;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:2px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;position:relative;overflow:hidden;}
   .sheet-table th:last-child{border-right:none;}
   .sheet-table td{padding:8px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;line-height:1.5;overflow:hidden;word-break:break-word;}
   .sheet-table td:last-child{border-right:none;}
   .sheet-table tr:last-child td{border-bottom:none;}
-  .sheet-table .wk{font-weight:700;white-space:nowrap;background:#f8fafc;font-size:12px;}
+  .sheet-table .wk{font-weight:700;white-space:nowrap;background:#F5F1FA;font-size:12px;}
   /* Column resize handle */
   .col-resize-handle{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;z-index:2;}
-  .col-resize-handle:hover{background:var(--blue);opacity:0.35;}
-  .col-resize-handle.col-resizing{background:var(--blue);opacity:0.5;}
-  .sheet-table .freeze-row td{background:#f3f4f6;color:var(--text-muted);}
+  .col-resize-handle:hover{background:var(--lt-dahlia);opacity:0.35;}
+  .col-resize-handle.col-resizing{background:var(--lt-dahlia);opacity:0.5;}
+  .sheet-table .freeze-row td{background:#EDE7F5;color:var(--text-muted);}
   .sheet-table .thai-row td{background:#fffbeb;}
-  .sheet-table .gtm-row td{background:#ecfdf5;font-weight:700;color:var(--green);font-size:14px;}
+  .sheet-table .gtm-row td{background:#E5FAE9;font-weight:700;color:#1A7C34;font-size:14px;}
   .sheet-table td[contenteditable]:empty::before{content:attr(data-placeholder);color:#d1d5db;font-style:italic;}
-  .sheet-table td[contenteditable]:focus{outline:2px solid var(--blue);outline-offset:-2px;background:#eff6ff;}
+  .sheet-table td[contenteditable]:focus{outline:2px solid var(--lt-dahlia);outline-offset:-2px;background:#FAF5FF;}
   .sheet-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);font-style:italic;}
 
   /* Status badges */
   .st-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;cursor:pointer;user-select:none;white-space:nowrap;}
   .st-badge:hover{filter:brightness(0.93);}
   .st-badge::after{content:'▾';font-size:9px;opacity:0.6;}
-  .st-gray{background:#f3f4f6;color:#6b7280;}
-  .st-blue{background:#dbeafe;color:#1d4ed8;}
-  .st-lblue{background:#e0f2fe;color:#0369a1;}
-  .st-yellow{background:#fef9c3;color:#a16207;}
-  .st-purple{background:#f5f3ff;color:#6d28d9;}
-  .st-green{background:#dcfce7;color:#15803d;}
-  .st-teal{background:#ccfbf1;color:#0f766e;}
+  .st-gray{background:#EEEBF5;color:#7B7490;}
+  .st-blue{background:#DDE9FA;color:#1A50B0;}
+  .st-lblue{background:#DCF0FC;color:#0369a1;}
+  .st-yellow{background:#FEF7DC;color:#96700A;}
+  .st-purple{background:#F0E6F8;color:#502274;}
+  .st-green{background:#DDF7E4;color:#1A7C34;}
+  .st-teal{background:#CCF7F0;color:#0f766e;}
   .sheet-table td.st-cell{vertical-align:middle;}
   /* Status dropdown */
   .st-dropdown{position:fixed;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:9999;min-width:170px;padding:4px;display:none;}
@@ -491,19 +533,19 @@
   /* Link chips */
   .link-cell{min-width:130px;vertical-align:top;}
   .link-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;}
-  .link-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 7px;background:var(--blue-light);color:var(--blue);border-radius:4px;text-decoration:none;font-weight:500;}
-  .link-chip:hover{background:#bfdbfe;}
-  .link-chip-x{border:none;background:none;color:#93c5fd;cursor:pointer;font-size:11px;padding:0;line-height:1;font-family:inherit;}
+  .link-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 7px;background:#F0E6F8;color:var(--lt-dahlia);border-radius:4px;text-decoration:none;font-weight:500;}
+  .link-chip:hover{background:#E5D5F5;}
+  .link-chip-x{border:none;background:none;color:#B69FAF;cursor:pointer;font-size:11px;padding:0;line-height:1;font-family:inherit;}
   .link-chip-x:hover{color:var(--red);}
   .link-add-btn{font-size:11px;color:var(--text-muted);background:none;border:1px dashed var(--border);border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;transition:all 0.15s;}
-  .link-add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+  .link-add-btn:hover{border-color:var(--lt-dahlia);color:var(--lt-dahlia);background:#F0E6F8;}
   .link-form{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;align-items:center;}
   .link-form input{border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:11px;font-family:inherit;outline:none;}
-  .link-form input:focus{border-color:var(--blue);}
+  .link-form input:focus{border-color:var(--lt-dahlia);}
   .link-url-input{flex:1;min-width:120px;}
   .link-label-input{width:70px;}
-  .link-save-btn{padding:3px 8px;background:var(--blue);color:white;border:none;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;}
-  .link-save-btn:hover{background:#1d4ed8;}
+  .link-save-btn{padding:3px 8px;background:var(--lt-dahlia);color:white;border:none;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .link-save-btn:hover{background:#3d1a59;}
   .link-cancel-btn{padding:3px 6px;background:none;border:1px solid var(--border);border-radius:4px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit;}
 
   /* ===== ADD PROJECT (task-group) ===== */
@@ -563,13 +605,13 @@
     cursor: pointer;
     font-family: inherit;
   }
-  .add-group-save-btn:hover { background: #6d28d9; }
+  .add-group-save-btn:hover { background: #3d1a59; }
   .dynamic-group {
     margin-bottom: 14px;
-    border: 1px solid #e9d5ff;
+    border: 1px solid #DDD0F0;
     border-radius: 8px;
     padding: 10px 14px 8px;
-    background: #faf5ff;
+    background: #FAF5FF;
   }
   .dynamic-group-header {
     display: flex;
@@ -610,17 +652,17 @@
     line-height: 1;
   }
   .task:hover .task-edit-btn { opacity: 1; }
-  .task-edit-btn:hover { color: var(--blue); background: var(--blue-light); }
+  .task-edit-btn:hover { color: var(--lt-dahlia); background: #F0E6F8; }
   .task-edit-input {
     flex: 1;
-    border: 1px solid var(--blue);
+    border: 1px solid var(--lt-dahlia);
     border-radius: 5px;
     padding: 3px 8px;
     font-size: 13px;
     outline: none;
     background: white;
     font-family: inherit;
-    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    box-shadow: 0 0 0 2px rgba(80,34,116,0.12);
     min-width: 0;
   }
 
@@ -653,11 +695,11 @@
     padding: 8px 10px;
     border-radius: 6px;
     background: var(--blue-light);
-    border: 1px solid #bfdbfe;
+    border: 1px solid #C8D9F7;
     flex-wrap: wrap;
   }
   .add-task-form input[type="text"] {
-    border: 1px solid #bfdbfe;
+    border: 1px solid #C8D9F7;
     border-radius: 5px;
     padding: 5px 8px;
     font-size: 13px;
@@ -667,7 +709,7 @@
   }
   .add-task-form input[type="text"]:focus {
     border-color: var(--blue);
-    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    box-shadow: 0 0 0 2px rgba(38,101,214,0.15);
   }
   .add-task-form .task-input { flex: 1; min-width: 160px; }
   .add-task-form .owner-input { width: 110px; }
@@ -675,7 +717,7 @@
   .add-task-form-btns { display: flex; gap: 4px; }
   .add-task-save-btn {
     padding: 5px 12px;
-    background: var(--blue);
+    background: var(--lt-hydrangea, #2665D6);
     color: white;
     border: none;
     border-radius: 5px;
@@ -684,7 +726,7 @@
     cursor: pointer;
     font-family: inherit;
   }
-  .add-task-save-btn:hover { background: #1d4ed8; }
+  .add-task-save-btn:hover { background: #1A4DB5; }
   .add-task-cancel-btn {
     padding: 5px 8px;
     background: transparent;
@@ -726,17 +768,25 @@
 <body>
 
 <nav class="sticky-nav" id="sticky-nav">
-  <a href="#section-timeline">🗓 Timeline</a>
-  <a href="#section-keydates">📌 Key Dates</a>
-  <a href="#section-phases">📋 Phases</a>
-  <a href="#section-risk">⚠️ Risks</a>
-  <a href="#section-tracker">📊 Weekly Tracker</a>
+  <span class="nav-logo">
+    <svg viewBox="0 0 2000 2000" xmlns="http://www.w3.org/2000/svg"><path d="M1113.74 600.049L1372.44 335.418L1523.55 488.182L1251.55 745.595H1633.55V958.503H1249.14L1522.34 1223.13L1371.23 1372.29L1000.11 1000.6L628.994 1372.29L479.097 1223.13L752.297 958.503H367.882V745.595H749.88L477.888 488.182L627.785 335.418L886.48 600.049V223.551H1111.33V600.049H1113.74ZM888.898 1264.03H1113.74V1769.24H888.898V1264.03Z"/></svg>
+  </span>
+  <a href="#section-timeline">Timeline</a>
+  <a href="#section-keydates">Key Dates</a>
+  <a href="#section-phases">Phases</a>
+  <a href="#section-risk">Risks</a>
+  <a href="#section-tracker">Weekly Tracker</a>
   <span class="nav-launch">🚀 Jun 15, 2026</span>
 </nav>
 
 <div class="header" id="section-top">
-  <h1>💬 Messaging GTM Workback Plan</h1>
-  <div class="meta">GTM: June 15, 2026 &nbsp;·&nbsp; Last updated: April 20, 2026 &nbsp;·&nbsp; Owner: Rawan</div>
+  <div class="header-logo">
+    <svg viewBox="0 0 2000 2000" xmlns="http://www.w3.org/2000/svg"><path d="M1113.74 600.049L1372.44 335.418L1523.55 488.182L1251.55 745.595H1633.55V958.503H1249.14L1522.34 1223.13L1371.23 1372.29L1000.11 1000.6L628.994 1372.29L479.097 1223.13L752.297 958.503H367.882V745.595H749.88L477.888 488.182L627.785 335.418L886.48 600.049V223.551H1111.33V600.049H1113.74ZM888.898 1264.03H1113.74V1769.24H888.898V1264.03Z"/></svg>
+  </div>
+  <div class="header-text">
+    <h1>Messaging GTM Workback Plan</h1>
+    <div class="meta">GTM: June 15, 2026 &nbsp;·&nbsp; Last updated: April 23, 2026 &nbsp;·&nbsp; Owner: Rawan</div>
+  </div>
 </div>
 
 <div class="timeline-bar" id="section-timeline">
@@ -779,7 +829,7 @@
     </div>
     <div class="tl-line" style="flex:1;margin-top:5px;"></div>
     <div class="tl-node" style="flex:0 0 auto;">
-      <div class="tl-dot" style="background:#7c3aed;box-shadow:0 0 0 2px #7c3aed;"></div>
+      <div class="tl-dot" style="background:#502274;box-shadow:0 0 0 2px #502274;"></div>
       <div class="tl-label">QA</div>
       <div class="tl-date">Jun 8–14</div>
     </div>
@@ -897,7 +947,7 @@
         <div class="gantt-row"><div class="gantt-flabel">Age verification</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:16.1%;background:#16a34a;">▶ In progress → Apr 29</div></div></div>
         <div class="gantt-row"><div class="gantt-flabel">Stacks</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:17.9%;background:#93c5fd;color:#1d4ed8;">awaiting designs</div><div class="gantt-bar" style="left:17.9%;width:43.2%;background:#2563eb;">Stacks build → May 24</div></div></div>
         <div class="gantt-row"><div class="gantt-flabel">Forms</div><div class="gantt-track"><div class="gantt-bar" style="left:36%;width:25%;background:#2563eb;">Forms build → May 24</div></div></div>
-        <div class="gantt-row"><div class="gantt-flabel">QA — all features</div><div class="gantt-track"><div class="gantt-bar" style="left:61%;width:21%;background:#7c3aed;">QA</div></div></div>
+        <div class="gantt-row"><div class="gantt-flabel">QA — all features</div><div class="gantt-track"><div class="gantt-bar" style="left:61%;width:21%;background:#502274;">QA</div></div></div>
         <!-- BETA -->
         <div class="gantt-group-row">
           <div class="gantt-gname" style="color:#065f46;">📈 Beta</div>
@@ -910,8 +960,8 @@
           <div class="gantt-gname" style="color:#5b21b6;">🚀 GTM</div>
           <div class="gantt-gtrack"></div>
         </div>
-        <div class="gantt-row"><div class="gantt-flabel">GTM strategy</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:37.5%;background:#7c3aed;">Lock by May 11</div></div></div>
-        <div class="gantt-row"><div class="gantt-flabel">Launch prep</div><div class="gantt-track"><div class="gantt-bar" style="left:75%;width:25%;background:#7c3aed;">🚀 Launch prep</div></div></div>
+        <div class="gantt-row"><div class="gantt-flabel">GTM strategy</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:37.5%;background:#502274;">Lock by May 11</div></div></div>
+        <div class="gantt-row"><div class="gantt-flabel">Launch prep</div><div class="gantt-track"><div class="gantt-bar" style="left:75%;width:25%;background:#502274;">🚀 Launch prep</div></div></div>
       </div>
     </div>
     <div class="gantt-legend">
@@ -923,7 +973,7 @@
       <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#93c5fd;"></div>Awaiting dependency</div>
       <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#dc2626;"></div>High risk</div>
       <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#1a9e6b;"></div>Beta</div>
-      <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#7c3aed;"></div>GTM / QA</div>
+      <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#502274;"></div>GTM / QA</div>
     </div>
   </div>
 

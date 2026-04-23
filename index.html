@@ -35,6 +35,41 @@
     line-height: 1.6;
   }
 
+  /* ===== STICKY NAV ===== */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #1f2937;
+    border-bottom: 1px solid #374151;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .sticky-nav a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 14px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .sticky-nav a:hover { color: white; }
+  .sticky-nav a.nav-active { color: white; border-bottom-color: #60a5fa; }
+  .sticky-nav .nav-launch {
+    margin-left: auto;
+    color: #34d399;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px 0 12px 14px;
+    white-space: nowrap;
+  }
+
   .header {
     background: #111827;
     color: white;
@@ -690,12 +725,21 @@
 </head>
 <body>
 
-<div class="header">
+<nav class="sticky-nav" id="sticky-nav">
+  <a href="#section-timeline">🗓 Timeline</a>
+  <a href="#section-keydates">📌 Key Dates</a>
+  <a href="#section-phases">📋 Phases</a>
+  <a href="#section-risk">⚠️ Risks</a>
+  <a href="#section-tracker">📊 Weekly Tracker</a>
+  <span class="nav-launch">🚀 Jun 15, 2026</span>
+</nav>
+
+<div class="header" id="section-top">
   <h1>💬 Messaging GTM Workback Plan</h1>
   <div class="meta">GTM: June 15, 2026 &nbsp;·&nbsp; Last updated: April 20, 2026 &nbsp;·&nbsp; Owner: Rawan</div>
 </div>
 
-<div class="timeline-bar">
+<div class="timeline-bar" id="section-timeline">
   <h3>Timeline Overview</h3>
   <div style="display:flex;align-items:flex-start;min-width:700px;gap:0;">
     <div class="tl-node" style="flex:0 0 auto;align-items:flex-start;">
@@ -751,7 +795,7 @@
 <div class="container">
 
   <!-- KEY DATES -->
-  <div class="key-dates">
+  <div class="key-dates" id="section-keydates">
     <h3>Key Dates</h3>
     <div class="date-row">
       <span class="date-tag warning">Apr 25</span>
@@ -882,6 +926,9 @@
       <div class="gantt-legend-item"><div class="gantt-legend-swatch" style="background:#7c3aed;"></div>GTM / QA</div>
     </div>
   </div>
+
+  <!-- PHASES -->
+  <div id="section-phases"></div>
 
   <!-- PHASE 1 -->
   <div class="phase phase-1">
@@ -1145,7 +1192,7 @@
   </div>
 
   <!-- RISK REGISTER -->
-  <div class="risk-register">
+  <div class="risk-register" id="section-risk">
     <div class="risk-header">⚠️ Risk Register</div>
     <div class="risk-item">
       <span class="risk-level risk-high">🔴 HIGH</span>
@@ -1178,7 +1225,7 @@
   </div>
 
   <!-- SHEET TABLE VIEW -->
-  <div class="sheet-section">
+  <div class="sheet-section" id="section-tracker">
     <div class="sheet-title">📋 Weekly Deliverables Tracker</div>
     <div class="sheet-wrap">
       <table class="sheet-table" id="deliverables-table">
@@ -2015,6 +2062,44 @@
       if (cell._setLinks) cell._setLinks(data[key] || []);
     });
   });
+
+  // ── Sticky nav: smooth scroll + active highlight ─────────────────────────
+  const NAV_HEIGHT = 44;
+
+  // Offset anchor scrolling so sticky nav doesn't cover the section
+  document.querySelectorAll('.sticky-nav a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT - 8;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+
+  // Highlight active nav link based on scroll position
+  const navSections = [
+    { id: 'section-timeline',  link: 'a[href="#section-timeline"]' },
+    { id: 'section-keydates',  link: 'a[href="#section-keydates"]' },
+    { id: 'section-phases',    link: 'a[href="#section-phases"]' },
+    { id: 'section-risk',      link: 'a[href="#section-risk"]' },
+    { id: 'section-tracker',   link: 'a[href="#section-tracker"]' },
+  ];
+
+  function updateActiveNav() {
+    const scrollY = window.scrollY + NAV_HEIGHT + 20;
+    let active = navSections[0];
+    navSections.forEach(s => {
+      const el = document.getElementById(s.id);
+      if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) active = s;
+    });
+    document.querySelectorAll('.sticky-nav a').forEach(a => a.classList.remove('nav-active'));
+    const activeLink = document.querySelector('.sticky-nav ' + active.link);
+    if (activeLink) activeLink.classList.add('nav-active');
+  }
+
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+  updateActiveNav();
 
   // ── Legacy functions (kept for onclick handlers) ──────────────────────────
   function togglePhase(header) {

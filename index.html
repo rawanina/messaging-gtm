@@ -428,6 +428,37 @@
   .sheet-table td[contenteditable]:empty::before{content:attr(data-placeholder);color:#d1d5db;font-style:italic;}
   .sheet-table td[contenteditable]:focus{outline:2px solid var(--blue);outline-offset:-2px;background:#eff6ff;}
   .sheet-note{font-size:11px;color:var(--text-muted);padding:8px 16px;border-top:1px solid var(--border);font-style:italic;}
+  .sheet-table .wk{font-weight:700;white-space:nowrap;background:#f8fafc;width:110px;font-size:12px;}
+
+  /* Status badges */
+  .st-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;cursor:pointer;user-select:none;white-space:nowrap;transition:filter 0.1s;}
+  .st-badge:hover{filter:brightness(0.92);}
+  .st-gray{background:#f3f4f6;color:#6b7280;}
+  .st-blue{background:#dbeafe;color:#1d4ed8;}
+  .st-lblue{background:#e0f2fe;color:#0369a1;}
+  .st-yellow{background:#fef9c3;color:#a16207;}
+  .st-purple{background:#f5f3ff;color:#6d28d9;}
+  .st-green{background:#dcfce7;color:#15803d;}
+  .st-teal{background:#ccfbf1;color:#0f766e;}
+  .sheet-table td.st-cell{min-width:120px;vertical-align:middle;}
+
+  /* Link chips */
+  .link-cell{min-width:130px;vertical-align:top;}
+  .link-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;}
+  .link-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 7px;background:var(--blue-light);color:var(--blue);border-radius:4px;text-decoration:none;font-weight:500;}
+  .link-chip:hover{background:#bfdbfe;}
+  .link-chip-x{border:none;background:none;color:#93c5fd;cursor:pointer;font-size:11px;padding:0;line-height:1;font-family:inherit;}
+  .link-chip-x:hover{color:var(--red);}
+  .link-add-btn{font-size:11px;color:var(--text-muted);background:none;border:1px dashed var(--border);border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .link-add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+  .link-form{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;align-items:center;}
+  .link-form input{border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:11px;font-family:inherit;outline:none;}
+  .link-form input:focus{border-color:var(--blue);}
+  .link-url-input{flex:1;min-width:120px;}
+  .link-label-input{width:70px;}
+  .link-save-btn{padding:3px 8px;background:var(--blue);color:white;border:none;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .link-save-btn:hover{background:#1d4ed8;}
+  .link-cancel-btn{padding:3px 6px;background:none;border:1px solid var(--border);border-radius:4px;font-size:11px;cursor:pointer;color:var(--text-muted);font-family:inherit;}
 
   /* ===== ADD PROJECT (task-group) ===== */
   .add-project-btn {
@@ -1142,68 +1173,111 @@
       <table class="sheet-table">
         <thead>
           <tr>
-            <th>Week starting</th><th>Week ending</th><th>Design Deliverable</th><th>Eng Deliverable</th><th>Marketing Deliverables</th>
+            <th>Week</th>
+            <th>Design Deliverable</th>
+            <th>Eng Deliverable</th>
+            <th>Marketing Deliverables</th>
+            <th>Links</th>
+            <th>Design Status</th>
+            <th>Eng Status</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="wk">Apr 20</td><td class="wk">Apr 25</td>
+            <td class="wk">Apr 20 → Apr 25</td>
             <td contenteditable data-placeholder="Add deliverable...">✅ Onboarding designs complete (Apr 25): in-product walkthrough, setup assistant "Save Time" + "Make Money" sections — handed off to eng</td>
             <td contenteditable data-placeholder="Add deliverable...">Setup assistant shipped (Kenny, due Apr 25); Age verification in progress</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="0"></td>
+            <td class="st-cell" data-type="design" data-row="0"></td>
+            <td class="st-cell" data-type="eng" data-row="0"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr>
-            <td class="wk">Apr 27</td><td class="wk">May 2</td>
+            <td class="wk">Apr 27 → May 2</td>
             <td contenteditable data-placeholder="Add deliverable...">✅ Visitor UX designs complete (Apr 28): profile entry points (contextual pop-up, message block, link actions, tree-top button), visitor entry from linkapps, DM Agent visitor flow — handed off to eng</td>
             <td contenteditable data-placeholder="Add deliverable...">Age verification completing Apr 29; Visitor entry eng begins ~Apr 28; Onboarding eng in progress</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="1"></td>
+            <td class="st-cell" data-type="design" data-row="1"></td>
+            <td class="st-cell" data-type="eng" data-row="1"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr class="thai-row">
-            <td class="wk">May 4</td><td class="wk">May 9</td>
+            <td class="wk">May 4 → May 9</td>
             <td contenteditable data-placeholder="Add deliverable...">🌴 Thailand — DM Agent linker flow finalizing async (due May 6); available for design feedback only</td>
             <td contenteditable data-placeholder="Add deliverable...">🌴 Thailand — Eng development continues async on features with full handoffs; DM Agent AI team in progress</td>
             <td contenteditable data-placeholder="Add deliverable...">🌴 Thailand — limited capacity</td>
+            <td class="link-cell" data-row="2"></td>
+            <td class="st-cell" data-type="design" data-row="2"></td>
+            <td class="st-cell" data-type="eng" data-row="2"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr>
-            <td class="wk">May 11</td><td class="wk">May 16</td>
+            <td class="wk">May 11 → May 16</td>
             <td contenteditable data-placeholder="Add deliverable...">✅ DM Agent linker setup flow complete (May 6 — carried in): enable agent, FAQs, personality, upgrade/paywall surface. ✅ Forms + Stacks designs complete (May 11 — final deadline): Stacks tab, duplicate prompt, bulk reply modal, cluster view; Forms creation + visitor-initiated form — all handed off to eng</td>
             <td contenteditable data-placeholder="Add deliverable...">Post-Thailand re-sync May 11; Stacks build begins; Visitor entry completing May 15; DM Agent in progress → May 20; GTM strategy locked May 11</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="3"></td>
+            <td class="st-cell" data-type="design" data-row="3"></td>
+            <td class="st-cell" data-type="eng" data-row="3"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr>
-            <td class="wk">May 18</td><td class="wk">May 23</td>
+            <td class="wk">May 18 → May 23</td>
             <td contenteditable data-placeholder="Add deliverable...">Design QA pass on all features; support eng with any open design questions; final sign-offs on DM Agent + Forms + Stacks</td>
             <td contenteditable data-placeholder="Add deliverable...">DM Agent completes May 20; all remaining features completing; QA cycles begin</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="4"></td>
+            <td class="st-cell" data-type="design" data-row="4"></td>
+            <td class="st-cell" data-type="eng" data-row="4"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr>
-            <td class="wk">May 25</td><td class="wk">May 30</td>
+            <td class="wk">May 25 → May 30</td>
             <td contenteditable data-placeholder="Add deliverable...">Launch creative assets (app store screenshots, social visuals, in-product banners); Go/No-Go design materials ready May 30</td>
             <td contenteditable data-placeholder="Add deliverable...">Go/No-Go decision May 30; feature freeze Jun 8 — bug fixes only from here</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="5"></td>
+            <td class="st-cell" data-type="design" data-row="5"></td>
+            <td class="st-cell" data-type="eng" data-row="5"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr>
-            <td class="wk">Jun 1</td><td class="wk">Jun 6</td>
+            <td class="wk">Jun 1 → Jun 6</td>
             <td contenteditable data-placeholder="Add deliverable...">Final marketing visuals locked; any last design polish from QA feedback</td>
             <td contenteditable data-placeholder="Add deliverable...">QA in progress; launch runbook ready; rollback plan confirmed</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="6"></td>
+            <td class="st-cell" data-type="design" data-row="6"></td>
+            <td class="st-cell" data-type="eng" data-row="6"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr>
-            <td class="wk">Jun 8</td><td class="wk">Jun 13</td>
+            <td class="wk">Jun 8 → Jun 13</td>
             <td contenteditable data-placeholder="Add deliverable...">Feature freeze Jun 8 — design complete. Final asset review &amp; sign-off; on call for any last-minute QA design fixes</td>
             <td contenteditable data-placeholder="Add deliverable...">Feature freeze Jun 8; QA sign-off; launch readiness review; final eng checks</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="7"></td>
+            <td class="st-cell" data-type="design" data-row="7"></td>
+            <td class="st-cell" data-type="eng" data-row="7"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
           <tr class="gtm-row">
-            <td class="wk" style="color:var(--green);">Jun 15</td><td class="wk" style="color:var(--green);">Jun 20</td>
+            <td class="wk" style="color:var(--green);">Jun 15 🚀</td>
             <td>🚀 GTM</td>
             <td>🚀 GTM — live to all users</td>
             <td contenteditable data-placeholder="Add deliverable..."></td>
+            <td class="link-cell" data-row="8"></td>
+            <td class="st-cell" data-type="design" data-row="8"></td>
+            <td class="st-cell" data-type="eng" data-row="8"></td>
+            <td contenteditable data-placeholder="Notes..."></td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="sheet-note">✏️ Click any cell to edit inline. Marketing column to be filled in by the marketing team.</div>
+    <div class="sheet-note">✏️ Click any cell to edit · Click a status badge to cycle it · Paste a URL in Links to add a chip</div>
   </div>
 
   <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;">
@@ -1711,6 +1785,144 @@
           }
         }
       });
+    });
+  });
+
+  // ── Status badges (click-to-cycle) ───────────────────────────────────────
+  const DESIGN_ST = [
+    { label: 'Not started',  cls: 'st-gray'   },
+    { label: 'In progress',  cls: 'st-blue'   },
+    { label: 'Review',       cls: 'st-yellow' },
+    { label: 'Completed',    cls: 'st-green'  },
+  ];
+  const ENG_ST = [
+    { label: 'Not started',         cls: 'st-gray'   },
+    { label: 'Partially developed', cls: 'st-lblue'  },
+    { label: 'In Progress',         cls: 'st-blue'   },
+    { label: 'QA',                  cls: 'st-purple' },
+    { label: 'Completed',           cls: 'st-green'  },
+    { label: 'Shipped',             cls: 'st-teal'   },
+  ];
+
+  function initStatusCell(cell) {
+    const type = cell.dataset.type;
+    const row  = cell.dataset.row;
+    const states = type === 'design' ? DESIGN_ST : ENG_ST;
+    const fbKey = 'table_status/' + type + '_' + row;
+
+    let current = 0;
+
+    const badge = document.createElement('span');
+    badge.className = 'st-badge ' + states[0].cls;
+    badge.textContent = states[0].label;
+    cell.appendChild(badge);
+
+    const applyState = (idx) => {
+      current = idx;
+      badge.textContent = states[idx].label;
+      badge.className = 'st-badge ' + states[idx].cls;
+    };
+
+    badge.addEventListener('click', () => {
+      const next = (current + 1) % states.length;
+      applyState(next);
+      const updates = {}; updates[fbKey] = next;
+      update(ref(db), updates);
+    });
+
+    cell._applyState = applyState;
+    cell._fbKey = fbKey;
+  }
+
+  document.querySelectorAll('.st-cell').forEach(initStatusCell);
+
+  onValue(ref(db, 'table_status'), snap => {
+    const data = snap.val() || {};
+    document.querySelectorAll('.st-cell').forEach(cell => {
+      const key = cell.dataset.type + '_' + cell.dataset.row;
+      if (data[key] !== undefined && cell._applyState) cell._applyState(data[key]);
+    });
+  });
+
+  // ── Link chips ────────────────────────────────────────────────────────────
+  function initLinkCell(cell) {
+    const row = cell.dataset.row;
+    const fbKey = 'table_links/row_' + row;
+    let links = []; // [{label, url}]
+
+    const chipsEl = document.createElement('div');
+    chipsEl.className = 'link-chips';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'link-add-btn';
+    addBtn.textContent = '+ Add link';
+    cell.appendChild(chipsEl);
+    cell.appendChild(addBtn);
+
+    const renderChips = () => {
+      chipsEl.innerHTML = '';
+      links.forEach((lnk, i) => {
+        const chip = document.createElement('a');
+        chip.className = 'link-chip';
+        chip.href = lnk.url;
+        chip.target = '_blank';
+        chip.rel = 'noopener';
+        chip.textContent = lnk.label || new URL(lnk.url.startsWith('http') ? lnk.url : 'https://' + lnk.url).hostname.replace('www.','');
+        const x = document.createElement('button');
+        x.className = 'link-chip-x';
+        x.textContent = '×';
+        x.title = 'Remove link';
+        x.onclick = (e) => {
+          e.preventDefault(); e.stopPropagation();
+          links.splice(i, 1);
+          renderChips();
+          const updates = {}; updates[fbKey] = links.length ? links : null;
+          update(ref(db), updates);
+        };
+        chip.appendChild(x);
+        chipsEl.appendChild(chip);
+      });
+    };
+
+    addBtn.onclick = () => {
+      addBtn.style.display = 'none';
+      const form = document.createElement('div');
+      form.className = 'link-form';
+      form.innerHTML = `
+        <input class="link-label-input" type="text" placeholder="Label (opt.)" />
+        <input class="link-url-input" type="text" placeholder="Paste URL…" />
+        <button class="link-save-btn">Add</button>
+        <button class="link-cancel-btn">✕</button>
+      `;
+      const labelIn = form.querySelector('.link-label-input');
+      const urlIn   = form.querySelector('.link-url-input');
+      const doSave = () => {
+        const url = urlIn.value.trim();
+        if (!url) { urlIn.style.borderColor = 'var(--red)'; urlIn.focus(); return; }
+        links.push({ label: labelIn.value.trim(), url });
+        renderChips();
+        const updates = {}; updates[fbKey] = links;
+        update(ref(db), updates);
+        form.remove();
+        addBtn.style.display = '';
+      };
+      form.querySelector('.link-save-btn').onclick = doSave;
+      form.querySelector('.link-cancel-btn').onclick = () => { form.remove(); addBtn.style.display = ''; };
+      urlIn.addEventListener('keydown', e => { if (e.key === 'Enter') doSave(); if (e.key === 'Escape') form.querySelector('.link-cancel-btn').click(); });
+      cell.insertBefore(form, addBtn);
+      urlIn.focus();
+    };
+
+    cell._setLinks = (arr) => { links = arr || []; renderChips(); };
+    cell._fbKey = fbKey;
+  }
+
+  document.querySelectorAll('.link-cell').forEach(initLinkCell);
+
+  onValue(ref(db, 'table_links'), snap => {
+    const data = snap.val() || {};
+    document.querySelectorAll('.link-cell').forEach(cell => {
+      const key = 'row_' + cell.dataset.row;
+      if (cell._setLinks) cell._setLinks(data[key] || []);
     });
   });
 

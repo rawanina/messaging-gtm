@@ -914,12 +914,64 @@
     color: var(--text-muted);
   }
 
+  /* ===== OVERALL PROGRESS STRIP ===== */
+  .progress-strip {
+    background: linear-gradient(135deg, #1E2330 0%, #2D1E40 100%);
+    padding: 9px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 2px solid rgba(67,230,96,0.18);
+  }
+  .ps-label { color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
+  .ps-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+  .ps-bar-fill { height: 100%; background: var(--lt-canopy); border-radius: 10px; transition: width 0.5s ease; width: 0%; }
+  .ps-pct { color: var(--lt-canopy); font-size: 14px; font-weight: 800; white-space: nowrap; }
+  .ps-tasks { color: rgba(255,255,255,0.38); font-size: 11px; white-space: nowrap; }
+
+  /* ===== PHASE STATUS BADGES ===== */
+  .phase-status-btn {
+    font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    cursor: pointer; user-select: none; white-space: nowrap;
+    border: none; font-family: inherit; transition: filter 0.12s; flex-shrink: 0;
+  }
+  .phase-status-btn:hover { filter: brightness(0.88); }
+  .psb-planned  { background: #EEEBF5; color: #7B7490; }
+  .psb-on-track { background: #DDF7E4; color: #1A7C34; }
+  .psb-at-risk  { background: var(--orange-light); color: var(--orange); }
+  .psb-done     { background: var(--lt-canopy); color: var(--lt-shade); }
+  /* Status picker dropdown */
+  .psb-dropdown { position: fixed; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); z-index: 9999; padding: 4px; display: none; min-width: 145px; }
+  .psb-dropdown.open { display: block; }
+  .psb-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text); }
+  .psb-dropdown-item:hover { background: var(--gray-light); }
+  .psb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ===== PRESENCE AVATARS ===== */
+  .presence-area { display: flex; align-items: center; padding: 0 4px; gap: 0; flex-shrink: 0; }
+  .pres-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: white;
+    border: 2px solid var(--lt-shade);
+    margin-left: -6px; cursor: default; flex-shrink: 0;
+    position: relative; transition: transform 0.15s; z-index: 1;
+  }
+  .pres-avatar:first-child { margin-left: 0; }
+  .pres-avatar:hover { transform: scale(1.2) translateY(-2px); z-index: 5; }
+  .pres-you { box-shadow: 0 0 0 2px var(--lt-canopy); }
+  .pres-avatar { font-size: 15px; line-height: 1; }
+
+  /* Fix nav-launch margin when presence is shown */
+  .sticky-nav .nav-launch { margin-left: auto; }
+
   @media (max-width: 600px) {
     .header { padding: 20px; }
     .container { padding: 16px; }
     .thailand-block .cols { flex-direction: column; }
     .beta-milestones { flex-direction: column; }
     .date-owner { display: none; }
+    .progress-strip { padding: 8px 16px; }
   }
 </style>
 </head>
@@ -934,7 +986,8 @@
   <a href="#section-phases">Phases</a>
   <a href="#section-risk">Risks</a>
   <a href="#section-tracker">Weekly Tracker</a>
-  <span class="nav-launch">🚀 Jun 15, 2026</span>
+  <span class="nav-launch" id="nav-launch">🚀 Jun 15, 2026</span>
+  <div class="presence-area" id="presence-area"></div>
 </nav>
 
 <div class="header" id="section-top">
@@ -945,6 +998,13 @@
     <h1>Messaging GTM Workback Plan</h1>
     <div class="meta">GTM: June 15, 2026 &nbsp;·&nbsp; Last updated: April 23, 2026 &nbsp;·&nbsp; Owner: Rawan</div>
   </div>
+</div>
+
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar-wrap"><div class="ps-bar-fill" id="ps-bar-fill"></div></div>
+  <span class="ps-pct" id="ps-pct">0%</span>
+  <span class="ps-tasks" id="ps-tasks">0 / 0 tasks</span>
 </div>
 
 <div class="timeline-bar" id="section-timeline">
@@ -1144,6 +1204,7 @@
       <span class="phase-badge">Phase 1</span>
       <span class="phase-title">Design Finalization + GTM Strategy Lock</span>
       <span class="phase-dates">Apr 20 – May 11</span>
+      <button class="phase-status-btn psb-planned" data-phase-idx="0" onclick="event.stopPropagation();openPhaseStatusPicker(this)">Planned</button>
       <span class="phase-toggle open">▲</span>
     </div>
     <div class="phase-body">
@@ -1250,6 +1311,7 @@
       <span class="phase-badge">Phase 2</span>
       <span class="phase-title">Core Development Sprint</span>
       <span class="phase-dates">May 10 – May 23</span>
+      <button class="phase-status-btn psb-planned" data-phase-idx="1" onclick="event.stopPropagation();openPhaseStatusPicker(this)">Planned</button>
       <span class="phase-toggle open">▲</span>
     </div>
     <div class="phase-body">
@@ -1336,6 +1398,7 @@
       <span class="phase-badge">Phase 3</span>
       <span class="phase-title">Feature Freeze + QA + Go/No-Go</span>
       <span class="phase-dates">Jun 8 – Jun 14</span>
+      <button class="phase-status-btn psb-planned" data-phase-idx="2" onclick="event.stopPropagation();openPhaseStatusPicker(this)">Planned</button>
       <span class="phase-toggle open">▲</span>
     </div>
     <div class="phase-body">
@@ -1373,6 +1436,7 @@
       <span class="phase-badge">Phase 4</span>
       <span class="phase-title">Launch Prep</span>
       <span class="phase-dates">June 1 – June 14</span>
+      <button class="phase-status-btn psb-planned" data-phase-idx="3" onclick="event.stopPropagation();openPhaseStatusPicker(this)">Planned</button>
       <span class="phase-toggle open">▲</span>
     </div>
     <div class="phase-body">
@@ -1577,10 +1641,14 @@
 
 </div>
 
+<!-- canvas-confetti -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
+
+
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDcdQJQW6EI_qPfdGCBz4f1MQ5iSUUqOBU",
@@ -1616,6 +1684,7 @@
         else cb.nextElementSibling && cb.nextElementSibling.classList.remove('checked');
       }
     });
+    updateProgressBar();
   });
 
   window._fbSaveCheckbox = function(cb) {
@@ -2062,6 +2131,8 @@
       updates['dynamic_tasks/' + section._sectionKey + '/' + taskKey + '/checked'] = this.checked;
       updates['checkboxes/' + cb._fbKey] = this.checked;
       update(ref(db), updates);
+      updateProgressBar();
+      if (this.checked) checkPhaseConfetti(this);
     };
 
     deleteBtn.onclick = () => {
@@ -2239,6 +2310,7 @@
         }
       });
     });
+    updateProgressBar();
   });
 
   // ── Column resize ─────────────────────────────────────────────────────────
@@ -2692,6 +2764,178 @@
     descInput.addEventListener('keydown',  e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) saveBtn.click(); });
   })();
 
+  // ── Progress bar ─────────────────────────────────────────────────────────
+  function updateProgressBar() {
+    const all     = Array.from(document.querySelectorAll('input[type="checkbox"]'));
+    const checked = all.filter(cb => cb.checked);
+    const total   = all.length;
+    const pct     = total === 0 ? 0 : Math.round(checked.length / total * 100);
+    const fill    = document.getElementById('ps-bar-fill');
+    const pctEl   = document.getElementById('ps-pct');
+    const tasksEl = document.getElementById('ps-tasks');
+    if (fill)    fill.style.width    = pct + '%';
+    if (pctEl)   pctEl.textContent   = pct + '%';
+    if (tasksEl) tasksEl.textContent = checked.length + ' / ' + total + ' tasks';
+  }
+  updateProgressBar();
+
+  // ── Launch countdown ──────────────────────────────────────────────────────
+  (function() {
+    const LAUNCH = new Date('2026-06-15T00:00:00');
+    const navLaunch = document.getElementById('nav-launch');
+    if (!navLaunch) return;
+    function refreshCountdown() {
+      const now   = new Date();
+      const diff  = Math.ceil((LAUNCH - now) / (1000 * 60 * 60 * 24));
+      if (diff > 1)       navLaunch.textContent = '🚀 ' + diff + ' days to launch';
+      else if (diff === 1) navLaunch.textContent = '🚀 Tomorrow!';
+      else if (diff === 0) navLaunch.textContent = '🚀 Launch day!';
+      else                 navLaunch.textContent = '🎉 Shipped! ' + Math.abs(diff) + 'd ago';
+    }
+    refreshCountdown();
+    setInterval(refreshCountdown, 60 * 60 * 1000); // refresh every hour
+  })();
+
+  // ── Confetti ─────────────────────────────────────────────────────────────
+  function checkPhaseConfetti(checkbox) {
+    const phase = checkbox.closest('.phase');
+    if (!phase) return;
+    const allCbs    = Array.from(phase.querySelectorAll('input[type="checkbox"]'));
+    const allDone   = allCbs.length > 0 && allCbs.every(cb => cb.checked);
+    if (!allDone) return;
+    const fire = window.confetti || null;
+    if (!fire) return;
+    // Burst 1
+    fire({ particleCount: 80, spread: 70, origin: { y: 0.5 },
+           colors: ['#43E660','#502274','#D717E7','#2665D6','#D2E823','#E9C0E9'] });
+    // Burst 2 after slight delay
+    setTimeout(() =>
+      fire({ particleCount: 50, spread: 100, origin: { y: 0.4 },
+             colors: ['#43E660','#D2E823','#E9C0E9'] }), 180);
+  }
+
+  // ── Phase status badges ──────────────────────────────────────────────────
+  (function() {
+    const STATES = [
+      { key: 'planned',  cls: 'psb-planned',  label: 'Planned',  dot: '#9ca3af' },
+      { key: 'on-track', cls: 'psb-on-track', label: 'On Track', dot: '#22c55e' },
+      { key: 'at-risk',  cls: 'psb-at-risk',  label: 'At Risk',  dot: '#f97316' },
+      { key: 'done',     cls: 'psb-done',     label: 'Done ✓',   dot: '#43E660' },
+    ];
+
+    // Build shared dropdown
+    const drop = document.createElement('div');
+    drop.className = 'psb-dropdown';
+    document.body.appendChild(drop);
+    let activeBtn = null;
+
+    function closeDrop() { drop.classList.remove('open'); activeBtn = null; }
+    document.addEventListener('click', e => {
+      if (!drop.contains(e.target) && !e.target.classList.contains('phase-status-btn')) closeDrop();
+    });
+
+    function applyState(btn, stateKey) {
+      const st = STATES.find(s => s.key === stateKey) || STATES[0];
+      btn.className = 'phase-status-btn ' + st.cls;
+      btn.textContent = st.label;
+      btn.dataset.state = stateKey;
+    }
+
+    window.openPhaseStatusPicker = function(btn) {
+      if (activeBtn === btn) { closeDrop(); return; }
+      activeBtn = btn;
+      drop.innerHTML = '';
+      const current = btn.dataset.state || 'planned';
+      STATES.forEach(st => {
+        const item = document.createElement('div');
+        item.className = 'psb-dropdown-item';
+        item.innerHTML = `<span class="psb-dot" style="background:${st.dot}"></span>${st.label}`;
+        if (st.key === current) item.style.fontWeight = '800';
+        item.addEventListener('click', () => {
+          applyState(btn, st.key);
+          const updates = {};
+          updates['phase_status/' + btn.dataset.phaseIdx] = st.key;
+          update(ref(db), updates);
+          closeDrop();
+        });
+        drop.appendChild(item);
+      });
+      const rect = btn.getBoundingClientRect();
+      drop.style.top  = (rect.bottom + 4) + 'px';
+      drop.style.left = rect.left + 'px';
+      drop.classList.add('open');
+    };
+
+    // Load saved phase statuses from Firebase
+    get(ref(db, 'phase_status')).then(snap => {
+      const data = snap.val() || {};
+      document.querySelectorAll('.phase-status-btn').forEach(btn => {
+        const saved = data[btn.dataset.phaseIdx];
+        if (saved) applyState(btn, saved);
+      });
+    });
+
+    // Sync in real-time
+    onValue(ref(db, 'phase_status'), snap => {
+      const data = snap.val() || {};
+      document.querySelectorAll('.phase-status-btn').forEach(btn => {
+        const saved = data[btn.dataset.phaseIdx];
+        if (saved) applyState(btn, saved);
+      });
+    });
+  })();
+
+  // ── Presence avatars ──────────────────────────────────────────────────────
+  (function() {
+    const FRUITS  = ['🍎','🍊','🍋','🍇','🍓','🫐','🍒','🥝','🍑','🍍','🥭','🍌','🍉','🥥','🍐','🍈'];
+    const COLORS  = ['#502274','#2665D6','#D717E7','#e67e22','#16a085','#1A7C34','#8e44ad','#2980b9','#c0392b','#0f766e'];
+    const area    = document.getElementById('presence-area');
+    if (!area) return;
+
+    // Get or create a stable user id + fruit + color (all random, persisted in localStorage)
+    let userId = localStorage.getItem('gtm_uid');
+    if (!userId) {
+      userId = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      localStorage.setItem('gtm_uid', userId);
+    }
+    let userFruit = localStorage.getItem('gtm_fruit');
+    if (!userFruit) {
+      userFruit = FRUITS[Math.floor(Math.random() * FRUITS.length)];
+      localStorage.setItem('gtm_fruit', userFruit);
+    }
+    let userColor = localStorage.getItem('gtm_color');
+    if (!userColor) {
+      userColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+      localStorage.setItem('gtm_color', userColor);
+    }
+
+    // Register presence in Firebase
+    const presRef = ref(db, 'presence/' + userId);
+    onDisconnect(presRef).remove();
+    set(presRef, { fruit: userFruit, color: userColor, ts: Date.now() });
+    // Refresh every 30s so stale sessions can be detected
+    setInterval(() => set(presRef, { fruit: userFruit, color: userColor, ts: Date.now() }), 30000);
+
+    // Render avatars
+    onValue(ref(db, 'presence'), snap => {
+      const data = snap.val() || {};
+      area.innerHTML = '';
+      // Prune entries older than 2 minutes (stale tabs that missed onDisconnect)
+      const cutoff = Date.now() - 2 * 60 * 1000;
+      const entries = Object.entries(data)
+        .filter(([, info]) => (info.ts || 0) > cutoff)
+        .sort(([a], [b]) => a === userId ? -1 : b === userId ? 1 : 0);
+      entries.forEach(([uid, info]) => {
+        const av = document.createElement('div');
+        av.className = 'pres-avatar' + (uid === userId ? ' pres-you' : '');
+        av.style.background = info.color || '#502274';
+        av.textContent = info.fruit || '🍎';
+        av.title = uid === userId ? 'You' : 'Someone\'s here';
+        area.appendChild(av);
+      });
+    });
+  })();
+
   // ── Sticky nav: smooth scroll + active highlight ─────────────────────────
   const NAV_HEIGHT = 44;
 
@@ -2749,6 +2993,8 @@
       taskText.classList.remove('checked');
     }
     window._fbSaveCheckbox && window._fbSaveCheckbox(checkbox);
+    updateProgressBar();
+    if (checkbox.checked) checkPhaseConfetti(checkbox);
   }
   window.toggleTask = toggleTask;
 

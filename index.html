@@ -1551,21 +1551,53 @@
   // Press * (Shift+8) in any table cell to insert a mini checkbox bullet.
   // Checking it strikes through the text. State is preserved in innerHTML.
 
+  // Attach all event handlers to a checkbox item (used on both insert and load)
+  function attachCheckboxHandlers(item, cb, txt, cell) {
+    // Toggle strikethrough on check/uncheck
+    cb.onchange = () => {
+      txt.classList.toggle('done', cb.checked);
+      if (cb.checked) cb.setAttribute('checked', '');
+      else            cb.removeAttribute('checked');
+      saveCell(cell);
+    };
+
+    // Backspace at position 0 in the text span → delete the whole checkbox item
+    txt.onkeydown = e => {
+      if (e.key !== 'Backspace') return;
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      // Only fire if nothing is selected and cursor is at the very start
+      if (!range.collapsed || range.startOffset !== 0) return;
+      e.preventDefault();
+      // Move caret to just before the item so the cursor lands sensibly
+      const parent = item.parentNode;
+      const r = document.createRange();
+      const prev = item.previousSibling;
+      if (prev && prev.nodeType === Node.TEXT_NODE) {
+        r.setStart(prev, prev.length);
+      } else if (prev) {
+        r.setStartAfter(prev);
+      } else {
+        r.setStartBefore(item);
+      }
+      r.collapse(true);
+      item.remove();
+      if (parent) parent.focus();
+      sel.removeAllRanges();
+      sel.addRange(r);
+      saveCell(cell);
+    };
+  }
+
   function initCellCheckboxes(cell) {
     cell.querySelectorAll('.cb-item').forEach(item => {
       const cb  = item.querySelector('.inline-cb');
       const txt = item.querySelector('.cb-text');
       if (!cb || !txt) return;
-      // Apply visual state from saved HTML attribute
+      txt.contentEditable = 'true'; // ensure it survived innerHTML round-trip
       txt.classList.toggle('done', cb.checked);
-      // Attach handler (replace any prior one to avoid duplicates)
-      cb.onchange = () => {
-        txt.classList.toggle('done', cb.checked);
-        // Persist checked state in the HTML attribute so innerHTML captures it
-        if (cb.checked) cb.setAttribute('checked', '');
-        else            cb.removeAttribute('checked');
-        saveCell(cell);
-      };
+      attachCheckboxHandlers(item, cb, txt, cell);
     });
   }
 
@@ -1582,12 +1614,7 @@
     txt.className = 'cb-text';
     txt.contentEditable = 'true';
 
-    cb.onchange = () => {
-      txt.classList.toggle('done', cb.checked);
-      if (cb.checked) cb.setAttribute('checked', '');
-      else            cb.removeAttribute('checked');
-      saveCell(cell);
-    };
+    attachCheckboxHandlers(item, cb, txt, cell);
 
     item.appendChild(cb);
     item.appendChild(txt);

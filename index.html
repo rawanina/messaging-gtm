@@ -2798,20 +2798,21 @@
 
   // ── Confetti ─────────────────────────────────────────────────────────────
   function checkPhaseConfetti(checkbox) {
-    const phase = checkbox.closest('.phase');
-    if (!phase) return;
-    const allCbs    = Array.from(phase.querySelectorAll('input[type="checkbox"]'));
-    const allDone   = allCbs.length > 0 && allCbs.every(cb => cb.checked);
-    if (!allDone) return;
     const fire = window.confetti || null;
     if (!fire) return;
-    // Burst 1
-    fire({ particleCount: 80, spread: 70, origin: { y: 0.5 },
+    // Small burst on every task check
+    fire({ particleCount: 40, spread: 60, origin: { y: 0.6 },
            colors: ['#43E660','#502274','#D717E7','#2665D6','#D2E823','#E9C0E9'] });
-    // Burst 2 after slight delay
-    setTimeout(() =>
-      fire({ particleCount: 50, spread: 100, origin: { y: 0.4 },
-             colors: ['#43E660','#D2E823','#E9C0E9'] }), 180);
+    // If the whole phase is now done, add a bigger celebration
+    const phase = checkbox.closest('.phase');
+    if (phase) {
+      const allCbs = Array.from(phase.querySelectorAll('input[type="checkbox"]'));
+      if (allCbs.length > 0 && allCbs.every(cb => cb.checked)) {
+        setTimeout(() =>
+          fire({ particleCount: 100, spread: 110, origin: { y: 0.4 },
+                 colors: ['#43E660','#D2E823','#E9C0E9','#502274'] }), 200);
+      }
+    }
   }
 
   // ── Phase status badges ──────────────────────────────────────────────────

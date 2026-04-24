@@ -863,6 +863,26 @@
   .task:hover .task-delete-btn { opacity: 1; }
   .task-delete-btn:hover { color: var(--red); background: var(--red-light); }
 
+  /* ===== DRAG TO REORDER TASKS ===== */
+  .drag-handle {
+    opacity: 0;
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 14px;
+    flex-shrink: 0;
+    padding: 0 2px;
+    border-radius: 3px;
+    transition: opacity 0.12s, color 0.12s;
+    user-select: none;
+    line-height: 1;
+    margin-right: 1px;
+  }
+  .task:hover .drag-handle { opacity: 1; }
+  .drag-handle:active { cursor: grabbing; color: var(--lt-dahlia); }
+  .task.dragging { opacity: 0.3; background: var(--gray-light); }
+  .task.drag-above { box-shadow: 0 -2px 0 0 var(--lt-dahlia); }
+  .task.drag-below { box-shadow: 0 2px 0 0 var(--lt-dahlia); }
+
   /* ===== INLINE CHECKBOXES (Shift+8 / * to insert) ===== */
   .cb-item {
     display: inline-flex;
@@ -2030,6 +2050,9 @@
 
     // Wire edit button — saves to the task's own text field in Firebase
     addEditButton(taskEl, 'dynamic_tasks/' + section._sectionKey + '/' + taskKey + '/text');
+
+    // Wire drag-to-reorder
+    if (window._dragWire) window._dragWire(taskEl, section);
   }
 
   // ── Add project (task-group) form + render ────────────────────────────────
@@ -2124,6 +2147,8 @@
       Object.entries(tasks)
         .sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0))
         .forEach(([taskKey, taskData]) => renderDynamicTask(groupEl, taskKey, taskData));
+      // Apply saved drag order after all tasks are in the DOM
+      if (window._dragApplyOrder) window._dragApplyOrder(groupEl);
     });
   }
 
@@ -2393,6 +2418,121 @@
       if (cell._setLinks) cell._setLinks(data[key] || []);
     });
   });
+
+  // ── Task drag-to-reorder ─────────────────────────────────────────────────
+  (function() {
+    let dragEl = null, dragCont = null;
+
+    function contKey(container) {
+      // Reuse the existing _sectionKey which is already stable across loads
+      return container._sectionKey;
+    }
+
+    function taskId(t) {
+      // Dynamic tasks use data-task-key; static tasks get data-drag-id assigned below
+      return t.dataset.taskKey || t.dataset.dragId;
+    }
+
+    function clearZones(container) {
+      container.querySelectorAll(':scope>.task').forEach(t =>
+        t.classList.remove('drag-above', 'drag-below'));
+    }
+
+    function saveOrder(container) {
+      const ck = contKey(container);
+      if (!ck) return;
+      const order = Array.from(container.querySelectorAll(':scope>.task'))
+        .map(taskId).filter(Boolean);
+      update(ref(db), { ['task_drag_order/' + ck]: order });
+    }
+
+    function applyOrder(container) {
+      const ck = contKey(container);
+      if (!ck) return;
+      get(ref(db, 'task_drag_order/' + ck)).then(snap => {
+        const order = snap.val();
+        if (!Array.isArray(order) || !order.length) return;
+        const map = {};
+        container.querySelectorAll(':scope>.task').forEach(t => {
+          const id = taskId(t); if (id) map[id] = t;
+        });
+        const addBtn = container.querySelector(':scope>.add-task-btn');
+        order.forEach(id => { if (map[id]) container.insertBefore(map[id], addBtn || null); });
+      });
+    }
+
+    function wireDrag(taskEl, container) {
+      if (taskEl.dataset.dragWired) return;
+      taskEl.dataset.dragWired = '1';
+
+      // Assign a stable ID to static (hardcoded) tasks
+      if (!taskId(taskEl)) {
+        const idx = Array.from(container.querySelectorAll(':scope>.task')).indexOf(taskEl);
+        taskEl.dataset.dragId = (contKey(container) || 'g') + '_si' + idx;
+      }
+
+      // Insert the drag handle as the very first child (before the checkbox)
+      const handle = document.createElement('span');
+      handle.className = 'drag-handle';
+      handle.innerHTML = '⠿';
+      handle.title = 'Drag to reorder';
+      taskEl.insertBefore(handle, taskEl.firstChild);
+
+      // Only become draggable when the user grabs the handle
+      handle.addEventListener('pointerdown', () => { taskEl.draggable = true; });
+      // Unset if the user releases without dragging
+      handle.addEventListener('pointerup',   () => { taskEl.draggable = false; });
+
+      taskEl.addEventListener('dragstart', e => {
+        dragEl = taskEl; dragCont = container;
+        e.dataTransfer.effectAllowed = 'move';
+        requestAnimationFrame(() => taskEl.classList.add('dragging'));
+      });
+
+      taskEl.addEventListener('dragend', () => {
+        taskEl.draggable = false;
+        taskEl.classList.remove('dragging');
+        if (dragCont) { clearZones(dragCont); saveOrder(dragCont); }
+        dragEl = dragCont = null;
+      });
+
+      taskEl.addEventListener('dragover', e => {
+        if (!dragEl || dragEl === taskEl || dragCont !== container) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        clearZones(container);
+        const mid = taskEl.getBoundingClientRect().top + taskEl.getBoundingClientRect().height / 2;
+        taskEl.classList.add(e.clientY < mid ? 'drag-above' : 'drag-below');
+      });
+
+      taskEl.addEventListener('dragleave', e => {
+        if (!taskEl.contains(e.relatedTarget))
+          taskEl.classList.remove('drag-above', 'drag-below');
+      });
+
+      taskEl.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragEl || dragEl === taskEl || dragCont !== container) return;
+        clearZones(container);
+        const mid = taskEl.getBoundingClientRect().top + taskEl.getBoundingClientRect().height / 2;
+        if (e.clientY < mid) container.insertBefore(dragEl, taskEl);
+        else taskEl.after(dragEl);
+      });
+    }
+
+    function initContainer(container) {
+      container.querySelectorAll(':scope>.task').forEach(t => wireDrag(t, container));
+      applyOrder(container);
+    }
+
+    // Wire all hardcoded task-groups at page load
+    document.querySelectorAll('.task-group').forEach(initContainer);
+
+    // Expose for use in dynamic task + group rendering
+    window._dragWire        = wireDrag;
+    window._dragApplyOrder  = applyOrder;
+    window._dragInitStatic  = initContainer;
+  })();
 
   // ── Risk Register ────────────────────────────────────────────────────────
   (function() {

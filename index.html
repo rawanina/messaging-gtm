@@ -1894,6 +1894,35 @@
     addEditButton(taskEl, 'task_edits/' + cb._fbKey);
   });
 
+  // Wire delete buttons onto all static (hardcoded) tasks
+  document.querySelectorAll('.task').forEach(taskEl => {
+    const cb = taskEl.querySelector('input[type="checkbox"]');
+    if (!cb || !cb._fbKey) return;
+    // Don't double-add if already has a delete button (dynamic tasks have one)
+    if (taskEl.querySelector('.task-delete-btn')) return;
+    const delBtn = document.createElement('button');
+    delBtn.className = 'task-delete-btn';
+    delBtn.title = 'Delete task';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => {
+      const key = cb._fbKey;
+      const updates = {};
+      updates['deleted_static_tasks/' + key] = true;
+      update(ref(db), updates).then(() => taskEl.remove());
+    };
+    taskEl.appendChild(delBtn);
+  });
+
+  // On load: hide any static tasks that have been deleted
+  get(ref(db, 'deleted_static_tasks')).then(snap => {
+    const deleted = snap.val() || {};
+    document.querySelectorAll('.task').forEach(taskEl => {
+      const cb = taskEl.querySelector('input[type="checkbox"]');
+      if (!cb || !cb._fbKey) return;
+      if (deleted[cb._fbKey]) taskEl.remove();
+    });
+  });
+
   // Load saved edits from Firebase and apply to static tasks
   onValue(ref(db, 'task_edits'), snap => {
     const data = snap.val() || {};

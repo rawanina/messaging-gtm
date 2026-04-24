@@ -2525,8 +2525,15 @@
       applyOrder(container);
     }
 
-    // Wire all hardcoded task-groups at page load
-    document.querySelectorAll('.task-group').forEach(initContainer);
+    // Wire all hardcoded containers:
+    // - .task-group elements (Phase 1 structure: section → task-group → tasks)
+    // - .section elements that have tasks directly inside them, no task-group wrapper
+    //   (Phases 2/3/4 structure: section → tasks). These have _sectionKey assigned.
+    const toWire = [
+      ...document.querySelectorAll('.task-group'),
+      ...document.querySelectorAll('.section')
+    ].filter(el => el._sectionKey);  // _sectionKey is the stable key for order storage
+    toWire.forEach(initContainer);
 
     // Expose for use in dynamic task + group rendering
     window._dragWire        = wireDrag;

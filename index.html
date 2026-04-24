@@ -418,6 +418,113 @@
   }
   .risk-high { background: var(--red-light); color: var(--red); }
   .risk-medium { background: var(--yellow-light); color: var(--yellow); }
+  .risk-low { background: var(--green-light); color: var(--green); }
+
+  /* ===== RISK REGISTER ADD / DELETE ===== */
+  .risk-item { position: relative; }
+  .risk-delete-btn {
+    opacity: 0;
+    position: absolute;
+    top: 12px; right: 14px;
+    padding: 2px 7px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 4px;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .risk-item:hover .risk-delete-btn { opacity: 1; }
+  .risk-delete-btn:hover { color: var(--red); background: var(--red-light); }
+
+  .add-risk-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: calc(100% - 48px);
+    margin: 12px 24px;
+    padding: 8px 14px;
+    border: 1px dashed #DDD0F0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .add-risk-btn:hover { border-color: var(--lt-dahlia); color: var(--lt-dahlia); background: var(--purple-light); }
+
+  .add-risk-form {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--purple-light);
+  }
+  .add-risk-form.open { display: flex; }
+  .risk-level-picker { display: flex; gap: 8px; }
+  .risk-level-btn {
+    padding: 4px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    color: var(--text-muted);
+  }
+  .risk-level-btn.sel-high   { background: var(--red-light);    color: var(--red);    border-color: var(--red); }
+  .risk-level-btn.sel-medium { background: var(--yellow-light);  color: var(--yellow); border-color: var(--yellow); }
+  .risk-level-btn.sel-low    { background: var(--green-light);   color: var(--green);  border-color: var(--green); }
+  .add-risk-form input, .add-risk-form textarea {
+    width: 100%;
+    border: 1px solid #DDD0F0;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    background: white;
+    resize: vertical;
+    color: var(--text);
+  }
+  .add-risk-form input:focus, .add-risk-form textarea:focus {
+    border-color: var(--lt-dahlia);
+    box-shadow: 0 0 0 2px rgba(80,34,116,0.1);
+  }
+  .add-risk-form textarea { min-height: 68px; }
+  .add-risk-form-btns { display: flex; gap: 6px; }
+  .add-risk-save-btn {
+    padding: 6px 14px;
+    background: var(--lt-dahlia);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-risk-save-btn:hover { background: #3d1a59; }
+  .add-risk-cancel-btn {
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: inherit;
+  }
+  .add-risk-cancel-btn:hover { background: white; }
   .risk-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
   .risk-desc { font-size: 12px; color: var(--text-muted); }
 
@@ -1275,32 +1382,47 @@
   <!-- RISK REGISTER -->
   <div class="risk-register" id="section-risk">
     <div class="risk-header">⚠️ Risk Register</div>
-    <div class="risk-item">
+    <div class="risk-item" data-static-index="0">
       <span class="risk-level risk-high">🔴 HIGH</span>
       <div>
         <div class="risk-title">DM Agent by June 15 is very ambitious</div>
         <div class="risk-desc">AI functionality, UX design, and eng integration all need to land in 8 weeks with Thailand in the middle. Recommend a hard go/no-go specifically on DM Agent by May 10 (post-Thailand return) so you have 3 weeks of buffer to descope it to post-GTM if needed — rather than finding out at the May 30 decision.</div>
       </div>
     </div>
-    <div class="risk-item">
+    <div class="risk-item" data-static-index="1">
       <span class="risk-level risk-medium">🟡 MEDIUM</span>
       <div>
         <div class="risk-title">GTM strategy must lock in ~14 days</div>
         <div class="risk-desc">From your April 6 notes, Mady flagged it was already tight. If it slips past May 11, PMM channel teams can't start building with enough runway before launch.</div>
       </div>
     </div>
-    <div class="risk-item">
+    <div class="risk-item" data-static-index="2">
       <span class="risk-level risk-medium">🟡 MEDIUM</span>
       <div>
         <div class="risk-title">Stacks + Forms designs must land by May 11</div>
         <div class="risk-desc">Stacks tab, duplicate prompt, and cluster view designs are not yet done. This is the last major design piece that blocks eng from starting. Zaakir's May 11 deadline is critical — any slip compresses the build window.</div>
       </div>
     </div>
-    <div class="risk-item">
+    <div class="risk-item" data-static-index="3">
       <span class="risk-level risk-medium">🟡 MEDIUM</span>
       <div>
         <div class="risk-title">Growth team alignment on pre-GTM new-user rollout</div>
         <div class="risk-desc">You noted "need to talk to the Growth team" about turning messaging on for new users before GTM. That conversation needs to happen before Jun 8 when the small test group goes live.</div>
+      </div>
+    </div>
+    <!-- Dynamic risks injected here by JS -->
+    <button class="add-risk-btn" id="add-risk-btn">+ Add risk</button>
+    <div class="add-risk-form" id="add-risk-form">
+      <div class="risk-level-picker">
+        <button class="risk-level-btn sel-high"   data-level="high">🔴 High</button>
+        <button class="risk-level-btn"             data-level="medium">🟡 Medium</button>
+        <button class="risk-level-btn"             data-level="low">🟢 Low</button>
+      </div>
+      <input  type="text" id="risk-title-input" placeholder="Risk title…">
+      <textarea id="risk-desc-input" placeholder="Description…"></textarea>
+      <div class="add-risk-form-btns">
+        <button class="add-risk-save-btn"   id="risk-save-btn">Add risk</button>
+        <button class="add-risk-cancel-btn" id="risk-cancel-btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -2271,6 +2393,128 @@
       if (cell._setLinks) cell._setLinks(data[key] || []);
     });
   });
+
+  // ── Risk Register ────────────────────────────────────────────────────────
+  (function() {
+    const riskRegister = document.getElementById('section-risk');
+    const addRiskBtn   = document.getElementById('add-risk-btn');
+    const riskForm     = document.getElementById('add-risk-form');
+    const titleInput   = document.getElementById('risk-title-input');
+    const descInput    = document.getElementById('risk-desc-input');
+    const saveBtn      = document.getElementById('risk-save-btn');
+    const cancelBtn    = document.getElementById('risk-cancel-btn');
+
+    function escRisk(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    const LEVEL_CFG = {
+      high:   { cls: 'risk-high',   badge: '🔴 HIGH' },
+      medium: { cls: 'risk-medium', badge: '🟡 MEDIUM' },
+      low:    { cls: 'risk-low',    badge: '🟢 LOW' },
+    };
+
+    function fixLastBorder() {
+      const items = riskRegister.querySelectorAll('.risk-item');
+      items.forEach(i => i.style.borderBottom = '');
+      if (items.length) items[items.length - 1].style.borderBottom = 'none';
+    }
+
+    function addDeleteBtn(item, onDelete) {
+      const btn = document.createElement('button');
+      btn.className = 'risk-delete-btn';
+      btn.title = 'Delete risk';
+      btn.textContent = '✕';
+      btn.addEventListener('click', () => { onDelete(); item.remove(); fixLastBorder(); });
+      item.appendChild(btn);
+    }
+
+    function renderDynamicRisk(key, data) {
+      const cfg  = LEVEL_CFG[data.level] || LEVEL_CFG.medium;
+      const item = document.createElement('div');
+      item.className = 'risk-item';
+      item.dataset.riskKey = key;
+      item.innerHTML = `
+        <span class="risk-level ${cfg.cls}">${cfg.badge}</span>
+        <div>
+          <div class="risk-title">${escRisk(data.title)}</div>
+          <div class="risk-desc">${escRisk(data.desc)}</div>
+        </div>`;
+      addDeleteBtn(item, () => update(ref(db), { ['dynamic_risks/' + key]: null }));
+      return item;
+    }
+
+    // Delete buttons on static risks
+    riskRegister.querySelectorAll('.risk-item[data-static-index]').forEach(item => {
+      const idx = item.dataset.staticIndex;
+      addDeleteBtn(item, () => update(ref(db), { ['deleted_static_risks/' + idx]: true }));
+    });
+
+    // Hide any previously deleted static risks (one-time read)
+    get(ref(db, 'deleted_static_risks')).then(snap => {
+      const deleted = snap.val() || {};
+      Object.keys(deleted).forEach(idx => {
+        const el = riskRegister.querySelector('[data-static-index="' + idx + '"]');
+        if (el) el.remove();
+      });
+      fixLastBorder();
+    });
+
+    // Load & sync dynamic risks
+    onValue(ref(db, 'dynamic_risks'), snap => {
+      riskRegister.querySelectorAll('.risk-item[data-risk-key]').forEach(i => i.remove());
+      const data = snap.val() || {};
+      Object.entries(data).forEach(([key, val]) => {
+        riskRegister.insertBefore(renderDynamicRisk(key, val), addRiskBtn);
+      });
+      fixLastBorder();
+    });
+
+    // Level picker
+    let selectedLevel = 'high';
+    riskForm.querySelectorAll('.risk-level-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        riskForm.querySelectorAll('.risk-level-btn').forEach(b => b.className = 'risk-level-btn');
+        selectedLevel = btn.dataset.level;
+        btn.classList.add('sel-' + selectedLevel);
+      });
+    });
+
+    function openForm() {
+      addRiskBtn.style.display = 'none';
+      riskForm.classList.add('open');
+      titleInput.focus();
+    }
+    function closeForm() {
+      riskForm.classList.remove('open');
+      addRiskBtn.style.display = '';
+      titleInput.value = '';
+      descInput.value  = '';
+      // Reset level picker to High
+      riskForm.querySelectorAll('.risk-level-btn').forEach(b => b.className = 'risk-level-btn');
+      riskForm.querySelector('[data-level="high"]').classList.add('sel-high');
+      selectedLevel = 'high';
+    }
+
+    addRiskBtn.addEventListener('click', openForm);
+    cancelBtn.addEventListener('click', closeForm);
+
+    saveBtn.addEventListener('click', () => {
+      const title = titleInput.value.trim();
+      const desc  = descInput.value.trim();
+      if (!title) { titleInput.focus(); return; }
+      const key  = 'risk_' + Date.now();
+      const data = { level: selectedLevel, title, desc };
+      update(ref(db), { ['dynamic_risks/' + key]: data });
+      riskRegister.insertBefore(renderDynamicRisk(key, data), addRiskBtn);
+      fixLastBorder();
+      closeForm();
+    });
+
+    // Enter in title jumps to description; Enter in description saves
+    titleInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); descInput.focus(); } });
+    descInput.addEventListener('keydown',  e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) saveBtn.click(); });
+  })();
 
   // ── Sticky nav: smooth scroll + active highlight ─────────────────────────
   const NAV_HEIGHT = 44;

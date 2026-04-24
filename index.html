@@ -756,6 +756,37 @@
   .task:hover .task-delete-btn { opacity: 1; }
   .task-delete-btn:hover { color: var(--red); background: var(--red-light); }
 
+  /* ===== INLINE CHECKBOXES (Shift+8 / * to insert) ===== */
+  .cb-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1.6;
+    vertical-align: baseline;
+  }
+  .cb-item .inline-cb {
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+    accent-color: var(--lt-dahlia);
+    flex-shrink: 0;
+    margin: 0;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .cb-item .cb-text {
+    min-width: 4px;
+    outline: none;
+    display: inline;
+    caret-color: var(--text);
+  }
+  .cb-item .cb-text.done {
+    text-decoration: line-through;
+    opacity: 0.42;
+    color: var(--text-muted);
+  }
+
   @media (max-width: 600px) {
     .header { padding: 20px; }
     .container { padding: 16px; }
@@ -1508,23 +1539,112 @@
       .trim();
   }
 
+  // Save a single cell to Firebase
+  function saveCell(cell) {
+    if (!cell._fbKey) return;
+    const updates = {};
+    updates['cells/' + cell._fbKey] = normalizeHTML(cell.innerHTML);
+    update(ref(db), updates);
+  }
+
+  // ── Inline checkboxes ────────────────────────────────────────────────────
+  // Press * (Shift+8) in any table cell to insert a mini checkbox bullet.
+  // Checking it strikes through the text. State is preserved in innerHTML.
+
+  function initCellCheckboxes(cell) {
+    cell.querySelectorAll('.cb-item').forEach(item => {
+      const cb  = item.querySelector('.inline-cb');
+      const txt = item.querySelector('.cb-text');
+      if (!cb || !txt) return;
+      // Apply visual state from saved HTML attribute
+      txt.classList.toggle('done', cb.checked);
+      // Attach handler (replace any prior one to avoid duplicates)
+      cb.onchange = () => {
+        txt.classList.toggle('done', cb.checked);
+        // Persist checked state in the HTML attribute so innerHTML captures it
+        if (cb.checked) cb.setAttribute('checked', '');
+        else            cb.removeAttribute('checked');
+        saveCell(cell);
+      };
+    });
+  }
+
+  function insertCheckbox(cell) {
+    const item = document.createElement('span');
+    item.className = 'cb-item';
+    item.contentEditable = 'false'; // atomic block inside the cell
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'inline-cb';
+
+    const txt = document.createElement('span');
+    txt.className = 'cb-text';
+    txt.contentEditable = 'true';
+
+    cb.onchange = () => {
+      txt.classList.toggle('done', cb.checked);
+      if (cb.checked) cb.setAttribute('checked', '');
+      else            cb.removeAttribute('checked');
+      saveCell(cell);
+    };
+
+    item.appendChild(cb);
+    item.appendChild(txt);
+
+    // Insert at current cursor position
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(item);
+      // Move cursor to just after the inserted item so outer-cell caret is fine
+      range.setStartAfter(item);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      cell.appendChild(item);
+    }
+
+    // Focus the text span so typing goes straight in
+    txt.focus();
+    const r = document.createRange();
+    r.selectNodeContents(txt);
+    r.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
+  // Listen for * (Shift+8) on the top-level table cells only
+  document.querySelectorAll('.sheet-table td[contenteditable]').forEach(cell => {
+    cell.addEventListener('keydown', e => {
+      if (e.key !== '*') return;
+      // Don't intercept if focus is already inside a cb-text span
+      const active = document.activeElement;
+      if (active && active.classList.contains('cb-text')) return;
+      e.preventDefault();
+      insertCheckbox(cell);
+    });
+  });
+
   onValue(ref(db, 'cells'), snap => {
     const data = snap.val() || {};
     document.querySelectorAll('[contenteditable]').forEach(cell => {
       if (data[cell._fbKey] !== undefined) {
-        // Use innerHTML so bold, italic, <br> line-breaks are all preserved
         cell.innerHTML = data[cell._fbKey];
+        initCellCheckboxes(cell); // re-attach checkbox handlers after load
       }
     });
   });
 
+  // Use focusout (bubbles from nested cb-text spans) so blur saves correctly
   document.querySelectorAll('[contenteditable]').forEach(cell => {
-    cell.addEventListener('blur', () => {
+    cell.addEventListener('focusout', e => {
+      // Only save when focus leaves the cell entirely (not when hopping between cb-text spans)
+      if (cell.contains(e.relatedTarget)) return;
       if (!cell._fbKey) return;
-      const updates = {};
-      // Save innerHTML (not textContent) to keep formatting intact
-      updates['cells/' + cell._fbKey] = normalizeHTML(cell.innerHTML);
-      update(ref(db), updates);
+      saveCell(cell);
     });
   });
 

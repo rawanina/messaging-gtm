@@ -1641,8 +1641,6 @@
 
 </div>
 
-<!-- canvas-confetti -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
 
 
 <!-- Firebase SDK -->
@@ -2796,21 +2794,67 @@
     setInterval(refreshCountdown, 60 * 60 * 1000); // refresh every hour
   })();
 
-  // ── Confetti ─────────────────────────────────────────────────────────────
+  // ── Confetti (built-in, no CDN) ───────────────────────────────────────────
+  function launchConfetti({ count = 50, spread = 70, originY = 0.6, colors = [] } = {}) {
+    const COLS = colors.length ? colors : ['#43E660','#502274','#D717E7','#2665D6','#D2E823','#E9C0E9'];
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99999;';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const ox = canvas.width * 0.5;
+    const oy = canvas.height * originY;
+    const spreadRad = spread * Math.PI / 180;
+    const particles = Array.from({ length: count }, () => {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * spreadRad;
+      const speed = 4 + Math.random() * 6;
+      return {
+        x: ox, y: oy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        color: COLS[Math.floor(Math.random() * COLS.length)],
+        w: 7 + Math.random() * 6,
+        h: 4 + Math.random() * 4,
+        rot: Math.random() * 360,
+        rotV: (Math.random() - 0.5) * 9,
+        life: 1,
+        decay: 0.013 + Math.random() * 0.007,
+      };
+    });
+
+    (function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      particles.forEach(p => {
+        p.x  += p.vx;  p.y  += p.vy;
+        p.vy += 0.14;  p.vx *= 0.99;
+        p.rot += p.rotV;  p.life -= p.decay;
+        if (p.life <= 0) return;
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      if (alive) requestAnimationFrame(draw);
+      else canvas.remove();
+    })();
+  }
+
   function checkPhaseConfetti(checkbox) {
-    const fire = window.confetti || null;
-    if (!fire) return;
     // Small burst on every task check
-    fire({ particleCount: 40, spread: 60, origin: { y: 0.6 },
-           colors: ['#43E660','#502274','#D717E7','#2665D6','#D2E823','#E9C0E9'] });
-    // If the whole phase is now done, add a bigger celebration
+    launchConfetti({ count: 45, spread: 65, originY: 0.6 });
+    // Big celebration if the whole phase is now done
     const phase = checkbox.closest('.phase');
     if (phase) {
       const allCbs = Array.from(phase.querySelectorAll('input[type="checkbox"]'));
       if (allCbs.length > 0 && allCbs.every(cb => cb.checked)) {
-        setTimeout(() =>
-          fire({ particleCount: 100, spread: 110, origin: { y: 0.4 },
-                 colors: ['#43E660','#D2E823','#E9C0E9','#502274'] }), 200);
+        setTimeout(() => launchConfetti({ count: 120, spread: 120, originY: 0.4 }), 220);
       }
     }
   }

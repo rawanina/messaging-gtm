@@ -1498,11 +1498,22 @@
     cell._fbKey = 'cell_' + i;
   });
 
+  // Normalize innerHTML before saving: Chrome wraps new lines in <div> tags;
+  // convert those to <br> so content is consistent across browsers and reloads.
+  function normalizeHTML(html) {
+    return html
+      .replace(/<div><br\s*\/?><\/div>/gi, '<br>')   // empty div → br
+      .replace(/<div>([\s\S]*?)<\/div>/gi, '<br>$1') // div line → br + content
+      .replace(/^<br>/, '')                           // strip leading br
+      .trim();
+  }
+
   onValue(ref(db, 'cells'), snap => {
     const data = snap.val() || {};
     document.querySelectorAll('[contenteditable]').forEach(cell => {
-      if (data[cell._fbKey] !== undefined && cell.textContent !== data[cell._fbKey]) {
-        cell.textContent = data[cell._fbKey];
+      if (data[cell._fbKey] !== undefined) {
+        // Use innerHTML so bold, italic, <br> line-breaks are all preserved
+        cell.innerHTML = data[cell._fbKey];
       }
     });
   });
@@ -1511,7 +1522,8 @@
     cell.addEventListener('blur', () => {
       if (!cell._fbKey) return;
       const updates = {};
-      updates['cells/' + cell._fbKey] = cell.textContent;
+      // Save innerHTML (not textContent) to keep formatting intact
+      updates['cells/' + cell._fbKey] = normalizeHTML(cell.innerHTML);
       update(ref(db), updates);
     });
   });
